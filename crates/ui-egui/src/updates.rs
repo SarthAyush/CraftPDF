@@ -11,8 +11,8 @@ use egui::{Align, Layout};
 
 use crate::{PdfCraftApp, theme, widgets};
 
-/// Where every PdfCraft release is listed.
-pub const RELEASES_PAGE: &str = "https://github.com/storytold/pdfcraft/releases";
+/// Where every CraftPDF release is listed.
+pub const RELEASES_PAGE: &str = "https://github.com/SarthAyush/CraftPDF/releases";
 
 /// The latest published release.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -60,6 +60,8 @@ pub(crate) struct Updates {
     pub(crate) check: Check,
     /// The Updates dialog is showing.
     pub(crate) open: bool,
+    /// Whether this check was initiated silently in the background on startup.
+    pub(crate) silent: bool,
 }
 
 impl PdfCraftApp {
@@ -72,6 +74,7 @@ impl PdfCraftApp {
         #[cfg(not(target_arch = "wasm32"))]
         {
             self.updates.open = true;
+            self.updates.silent = false;
             if matches!(self.updates.check, Check::Running(_)) {
                 return;
             }
@@ -93,6 +96,29 @@ impl PdfCraftApp {
         }
     }
 
+    /// Check for updates silently on startup; notifies the user if a newer version is available.
+    pub fn check_for_updates_silently(&mut self) {
+        let Some(source) = self.update_source.clone() else {
+            return;
+        };
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            if matches!(self.updates.check, Check::Running(_)) {
+                return;
+            }
+            self.updates.silent = true;
+            let (tx, rx) = std::sync::mpsc::channel();
+            let ctx = self.ctx.clone();
+            std::thread::spawn(move || {
+                let _ = tx.send(source());
+                if let Some(ctx) = ctx {
+                    ctx.request_repaint();
+                }
+            });
+            self.updates.check = Check::Running(rx);
+        }
+    }
+
     /// Pick up a finished check (each frame).
     pub(crate) fn poll_updates(&mut self) {
         #[cfg(not(target_arch = "wasm32"))]
@@ -102,6 +128,11 @@ impl PdfCraftApp {
                 Err(std::sync::mpsc::TryRecvError::Empty) => return,
                 Err(std::sync::mpsc::TryRecvError::Disconnected) => Err("the update check stopped unexpectedly".into()),
             };
+            if let Ok(ref release) = result {
+                if is_newer(&release.version, env!("CARGO_PKG_VERSION")) {
+                    self.updates.open = true;
+                }
+            }
             self.updates.check = Check::Done(result);
         }
     }
