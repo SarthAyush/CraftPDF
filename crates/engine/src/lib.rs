@@ -3851,6 +3851,11 @@ impl Session {
         self.write_new(&pdfcraft_create::blank(width, height, pages)?)
     }
 
+    /// A new styled design template document (Modern Invoice, Resume, Proposal, Notebook, Certificate).
+    pub fn create_styled_template(&self, category: &str, style: usize, color: [u8; 3]) -> Result<Arc<Vec<u8>>, EditError> {
+        self.write_new(&pdfcraft_create::generate_template(category, style, color)?)
+    }
+
     /// A new document with one page per image (PNG, JPEG).
     pub fn create_from_images(&self, images: &[(String, Vec<u8>)]) -> Result<Arc<Vec<u8>>, EditError> {
         self.write_new(&pdfcraft_create::from_images(images)?)

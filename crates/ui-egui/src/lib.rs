@@ -56,7 +56,9 @@ mod search_ui;
 mod sign_ui;
 mod stamps_ui;
 mod standards_ui;
+mod template_picker;
 mod zoom_snap;
+pub use template_picker::TemplatePickerState;
 /// Header & footer / watermark / background dialog types (tests and automation).
 pub mod marks {
     pub use crate::marks_ui::{MarksDraft, PageRange, Subset};
@@ -777,6 +779,8 @@ pub struct PdfCraftApp {
     pub notification_viewer_open: bool,
     /// Active tab in the home design template hub (0 = Quick Studio, 1 = Templates, 2 = Tools, 3 = Recent).
     pub home_template_tab: usize,
+    /// Active state for the template style picker modal.
+    pub template_picker: Option<TemplatePickerState>,
 }
 
 /// Where in a document a request to open an address came from.
@@ -1034,6 +1038,7 @@ impl PdfCraftApp {
             number_draft: NumberDraft { from: 1, to: 1, style: pdfcraft_engine::LabelStyle::Decimal, prefix: String::new(), start: 1 },
             notification_viewer_open: false,
             home_template_tab: 0,
+            template_picker: None,
         }
     }
 
@@ -1048,6 +1053,14 @@ impl PdfCraftApp {
     /// Creates and opens a new template document with standard dimensions.
     pub fn create_template_document(&mut self, name: &str, width: f64, height: f64, pages: usize) {
         let created = self.session.create_blank(width, height, pages).map_err(|e| e.to_string());
+        if let Err(e) = self.open_created_bytes(name, created) {
+            self.notify_fmt("Couldn't create template: {e}", &[("e", &e.to_string())]);
+        }
+    }
+
+    /// Creates and opens a new parametric styled template document.
+    pub fn create_styled_template_document(&mut self, name: &str, category: &str, style: usize, color: [u8; 3]) {
+        let created = self.session.create_styled_template(category, style, color).map_err(|e| e.to_string());
         if let Err(e) = self.open_created_bytes(name, created) {
             self.notify_fmt("Couldn't create template: {e}", &[("e", &e.to_string())]);
         }
@@ -2937,6 +2950,7 @@ impl eframe::App for PdfCraftApp {
         self.process_pending_edits();
         palette::show(self, &ctx);
         dialogs::show(self, &ctx);
+        template_picker::show(self, &ctx);
         chrome::notification_viewer(self, &ctx);
         self.show_progress(&ctx);
         widgets::toast(self, &ctx);

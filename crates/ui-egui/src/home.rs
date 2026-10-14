@@ -20,6 +20,7 @@ fn card_lift(ui: &egui::Ui, t: &Tokens, rect: Rect, press: theme::Press) {
 
 struct DesignTemplate {
     category: usize,
+    category_key: &'static str,
     badge: &'static str,
     title: &'static str,
     desc: &'static str,
@@ -35,6 +36,7 @@ struct DesignTemplate {
 const TEMPLATES: [DesignTemplate; 6] = [
     DesignTemplate {
         category: 1,
+        category_key: "blank",
         badge: "Standard",
         title: "Blank Canvas",
         desc: "Clean white letter-sized sheet, ready for adding text, vectors, annotations and signatures.",
@@ -48,6 +50,7 @@ const TEMPLATES: [DesignTemplate; 6] = [
     },
     DesignTemplate {
         category: 3,
+        category_key: "invoice",
         badge: "Finance",
         title: "Modern Invoice",
         desc: "Professional layout tailored for client invoicing, itemized billing tables, and bank details.",
@@ -61,6 +64,7 @@ const TEMPLATES: [DesignTemplate; 6] = [
     },
     DesignTemplate {
         category: 3,
+        category_key: "proposal",
         badge: "3 Pages",
         title: "Project Proposal",
         desc: "Complete executive proposal featuring Title Cover, Scope of Work, and Project Timeline.",
@@ -74,6 +78,7 @@ const TEMPLATES: [DesignTemplate; 6] = [
     },
     DesignTemplate {
         category: 1,
+        category_key: "resume",
         badge: "Career",
         title: "Professional Resume",
         desc: "Clean two-column CV template highlighting experience, technical skills, and achievements.",
@@ -87,6 +92,7 @@ const TEMPLATES: [DesignTemplate; 6] = [
     },
     DesignTemplate {
         category: 2,
+        category_key: "notebook",
         badge: "Technical",
         title: "Engineering Notebook",
         desc: "Multi-page technical journal with standard margins and 5mm grid structure for formulas and sketches.",
@@ -100,6 +106,7 @@ const TEMPLATES: [DesignTemplate; 6] = [
     },
     DesignTemplate {
         category: 2,
+        category_key: "certificate",
         badge: "Landscape",
         title: "Award Certificate",
         desc: "Distinguished certificate template featuring perimeter framing, presentation header, and signature lines.",
@@ -148,7 +155,11 @@ fn template_card(
     let desc_galley = ui.fonts_mut(|f| f.layout_job(desc_job));
     ui.painter().galley(body.min + vec2(14.0, 62.0), desc_galley, t.text_muted);
 
-    let action_text = if resp.hovered() { "Create & Open Now →" } else { "Create Template →" };
+    let action_text = if tmpl.category_key == "blank" {
+        if resp.hovered() { "Create Blank Now →" } else { "Create Blank →" }
+    } else {
+        if resp.hovered() { "Customize Styles →" } else { "Choose Style →" }
+    };
     ui.painter().text(
         body.left_bottom() + vec2(14.0, -14.0),
         Align2::LEFT_CENTER,
@@ -366,7 +377,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             ui.add_space(12.0);
 
             // Templates Grid (3 columns on wide screens)
-            let mut chosen_template: Option<(&'static str, f64, f64, usize)> = None;
+            let mut create_blank: Option<(&'static str, f64, f64, usize)> = None;
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
                 let w = ((ui.available_width() - 24.0) / 3.0).max(210.0);
@@ -375,11 +386,21 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         continue;
                     }
                     if template_card(ui, &t, tmpl, w).clicked() {
-                        chosen_template = Some((tmpl.default_filename, tmpl.width, tmpl.height, tmpl.pages));
+                        if tmpl.category_key == "blank" {
+                            create_blank = Some((tmpl.default_filename, tmpl.width, tmpl.height, tmpl.pages));
+                        } else {
+                            app.template_picker = Some(crate::TemplatePickerState {
+                                category_key: tmpl.category_key,
+                                category_title: tmpl.title,
+                                default_filename: tmpl.default_filename,
+                                selected_style: 0,
+                                selected_color: 0,
+                            });
+                        }
                     }
                 }
             });
-            if let Some((name, w, h, pages)) = chosen_template {
+            if let Some((name, w, h, pages)) = create_blank {
                 app.create_template_document(name, w, h, pages);
             }
             ui.add_space(22.0);

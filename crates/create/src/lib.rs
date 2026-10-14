@@ -6,6 +6,8 @@ use pdfcraft_cos::{Dict, Document, ObjRef, Object, PdfString, Stream};
 
 mod extract;
 pub use extract::{ExtractedImage, ImageExport, extract_images, image_file};
+mod templates;
+pub use templates::generate_template;
 use pdfcraft_fonts::{literal, win_ansi, wrap};
 
 #[derive(Debug, thiserror::Error, PartialEq)]
@@ -22,7 +24,7 @@ pub const LETTER: (f64, f64) = (612.0, 792.0);
 /// The largest page side PDF allows (ISO 32000-2 Annex C: 14 400 units).
 const MAX_SIDE: f64 = 14_400.0;
 
-fn add_page(doc: &mut Document, w: f64, h: f64, resources: Dict, content: Option<Vec<u8>>) -> Result<ObjRef, CreateError> {
+pub(crate) fn add_page(doc: &mut Document, w: f64, h: f64, resources: Dict, content: Option<Vec<u8>>) -> Result<ObjRef, CreateError> {
     // `Document::new_empty` always has a page tree.
     let pages = doc
         .root()
@@ -47,7 +49,7 @@ fn add_page(doc: &mut Document, w: f64, h: f64, resources: Dict, content: Option
     Ok(r)
 }
 
-fn set_title(doc: &mut Document, title: &str) {
+pub(crate) fn set_title(doc: &mut Document, title: &str) {
     let mut info = Dict::new();
     info.set(b"Title".to_vec(), PdfString::text(title));
     info.set(b"Producer".to_vec(), PdfString::text("PdfCraft"));
