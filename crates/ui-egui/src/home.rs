@@ -1,11 +1,11 @@
 //! Home tab: recommended tools, open card, pinned folders and recent files (local only, never
 //! another app's list).
 
-use egui::{Align2, CornerRadius, Rect, Sense, Stroke, vec2};
+use egui::{Align2, Color32, CornerRadius, Rect, Sense, Stroke, vec2};
 use pdfcraft_engine::catalog;
 
 use crate::theme::{self, Tokens};
-use crate::{PdfCraftApp, icons, panels::human_size, widgets};
+use crate::{Mode, PdfCraftApp, icons, panels::human_size, widgets};
 
 const RECOMMENDED: [&str; 5] = ["organize", "comment", "form", "edit", "protect"];
 
@@ -18,61 +18,221 @@ fn card_lift(ui: &egui::Ui, t: &Tokens, rect: Rect, press: theme::Press) {
     }
 }
 
+fn workflow_card(
+    ui: &mut egui::Ui,
+    t: &Tokens,
+    icon: &str,
+    color: Color32,
+    badge: &str,
+    title: &str,
+    desc: &str,
+    action_label: &str,
+    width: f32,
+) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(width, 114.0), Sense::click());
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, title));
+    let press = theme::Press::track(ui, &resp);
+    card_lift(ui, t, rect, press);
+    let fill = press.fill(t.card, t.hover, t.pressed);
+    let border_color = if resp.hovered() { color.gamma_multiply(0.7) } else { t.border };
+    ui.painter().rect(rect, CornerRadius::same(12), fill, Stroke::new(1.0, border_color), egui::StrokeKind::Inside);
+    let body = rect.translate(press.offset());
+
+    icons::paint(ui, Rect::from_min_size(body.min + vec2(14.0, 14.0), vec2(20.0, 20.0)), icon, 18.0, color);
+
+    let badge_job = egui::text::LayoutJob::simple_singleline(badge.to_uppercase(), theme::semibold(10.0), color);
+    let badge_galley = ui.fonts_mut(|f| f.layout_job(badge_job));
+    ui.painter().galley(body.min + vec2(40.0, 16.0), badge_galley, color);
+
+    let mut title_job = egui::text::LayoutJob::simple_singleline(title.to_owned(), theme::semibold(13.5), t.text);
+    title_job.wrap = egui::text::TextWrapping::truncate_at_width((body.width() - 28.0).max(10.0));
+    let title_galley = ui.fonts_mut(|f| f.layout_job(title_job));
+    ui.painter().galley(body.min + vec2(14.0, 40.0), title_galley, t.text);
+
+    let mut desc_job = egui::text::LayoutJob::simple(desc.to_owned(), theme::regular(11.0), t.text_muted, (body.width() - 28.0).max(10.0));
+    desc_job.wrap.max_rows = 2;
+    let desc_galley = ui.fonts_mut(|f| f.layout_job(desc_job));
+    ui.painter().galley(body.min + vec2(14.0, 60.0), desc_galley, t.text_muted);
+
+    ui.painter().text(
+        body.left_bottom() + vec2(14.0, -13.0),
+        Align2::LEFT_CENTER,
+        format!("{} →", action_label),
+        theme::semibold(11.5),
+        color,
+    );
+
+    theme::hand(resp)
+}
+
 pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
         egui::Frame::NONE.inner_margin(egui::Margin { left: 36, right: 36, top: 28, bottom: 28 }).show(ui, |ui| {
-            ui.horizontal(|ui| {
-                egui::Frame::NONE
-                    .fill(t.accent_soft)
-                    .corner_radius(CornerRadius::same(6))
-                    .inner_margin(egui::Margin::symmetric(8, 4))
-                    .show(ui, |ui| {
-                        ui.label(
-                            egui::RichText::new("✦ SARTHAYUSH EDITION")
-                                .font(theme::semibold(11.0))
-                                .color(t.accent_text)
-                                .extra_letter_spacing(0.6),
-                        );
-                    });
-            });
-            ui.add_space(6.0);
-            ui.label(egui::RichText::new("Welcome to CraftPDF").font(theme::semibold(25.0)).color(t.text));
-            ui.label(
-                egui::RichText::new("High-performance personal PDF engineering workbench — local, private, and blazing fast.")
-                    .color(t.text_muted)
-                    .font(theme::regular(14.0)),
-            );
-            ui.add_space(14.0);
+            // Hero Studio Header Card
             egui::Frame::NONE
                 .fill(t.card)
-                .stroke(Stroke::new(1.5, t.accent.gamma_multiply(0.35)))
-                .corner_radius(CornerRadius::same(14))
-                .inner_margin(egui::Margin::symmetric(18, 16))
+                .stroke(Stroke::new(1.5, t.accent.gamma_multiply(0.4)))
+                .corner_radius(CornerRadius::same(16))
+                .inner_margin(egui::Margin::symmetric(24, 20))
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.horizontal(|ui| {
-                        let (rect, _) = ui.allocate_exact_size(vec2(38.0, 38.0), Sense::hover());
-                        icons::paint(ui, rect, "github", 32.0, t.accent);
-                        ui.add_space(8.0);
-                        ui.vertical(|ui| {
-                            ui.label(egui::RichText::new("CraftPDF by SarthAyush").font(theme::semibold(16.0)).color(t.text));
-                            ui.horizontal(|ui| {
-                                ui.spacing_mut().item_spacing = vec2(6.0, 2.0);
-                                ui.label(egui::RichText::new("⚡ Pure Rust").font(theme::medium(11.5)).color(t.text_muted));
-                                ui.label(egui::RichText::new("·").color(t.text_faint));
-                                ui.label(egui::RichText::new("🔒 100% Local & Private").font(theme::medium(11.5)).color(t.text_muted));
-                                ui.label(egui::RichText::new("·").color(t.text_faint));
-                                ui.label(egui::RichText::new("🚀 GPU Accelerated").font(theme::medium(11.5)).color(t.text_muted));
+                        egui::Frame::NONE
+                            .fill(t.accent_soft)
+                            .corner_radius(CornerRadius::same(6))
+                            .inner_margin(egui::Margin::symmetric(10, 4))
+                            .show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new("✦ CRAFTPDF STUDIO 2.0")
+                                        .font(theme::semibold(11.0))
+                                        .color(t.accent_text)
+                                        .extra_letter_spacing(0.6),
+                                );
                             });
-                        });
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if widgets::icon_pill(ui, "github", "GitHub Profile", true).clicked() {
-                                app.open_url("https://github.com/SarthAyush");
-                            }
-                        });
+                        ui.add_space(4.0);
+                        egui::Frame::NONE
+                            .fill(t.hover)
+                            .stroke(Stroke::new(1.0, t.border))
+                            .corner_radius(CornerRadius::same(6))
+                            .inner_margin(egui::Margin::symmetric(8, 4))
+                            .show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new("v0.7.2")
+                                        .font(theme::medium(11.0))
+                                        .color(t.text_muted),
+                                );
+                            });
+                        ui.add_space(4.0);
+                        egui::Frame::NONE
+                            .fill(t.hover)
+                            .stroke(Stroke::new(1.0, t.border))
+                            .corner_radius(CornerRadius::same(6))
+                            .inner_margin(egui::Margin::symmetric(8, 4))
+                            .show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new("⚡ SARTHAYUSH EDITION")
+                                        .font(theme::semibold(11.0))
+                                        .color(t.accent_text),
+                                );
+                            });
+                    });
+                    ui.add_space(8.0);
+                    ui.label(egui::RichText::new("CraftPDF Personal Studio").font(theme::semibold(26.0)).color(t.text));
+                    ui.add_space(2.0);
+                    ui.label(
+                        egui::RichText::new("High-performance personal PDF engineering workbench — local, private, and blazing fast.")
+                            .color(t.text_muted)
+                            .font(theme::regular(14.0)),
+                    );
+                    ui.add_space(10.0);
+                    ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing = vec2(6.0, 2.0);
+                        ui.label(egui::RichText::new("⚡ Pure Rust Engine").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("·").color(t.text_faint));
+                        ui.label(egui::RichText::new("🔒 100% Offline & Private").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("·").color(t.text_faint));
+                        ui.label(egui::RichText::new("🚫 Zero Telemetry").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("·").color(t.text_faint));
+                        ui.label(egui::RichText::new("🚀 GPU Accelerated").font(theme::medium(12.0)).color(t.text_muted));
+                    });
+                    ui.add_space(14.0);
+                    ui.horizontal_wrapped(|ui| {
+                        ui.spacing_mut().item_spacing = vec2(10.0, 8.0);
+                        if widgets::pill_button(ui, "⚡ Open PDF Document", true).clicked() {
+                            app.open_dialog();
+                        }
+                        if widgets::pill_button(ui, "📑 Combine Files", false).clicked() {
+                            app.open_combine_tab();
+                        }
+                        if widgets::pill_button(ui, "🛠️ All Tools Suite", false).clicked() {
+                            app.switch_mode(Mode::AllTools, true);
+                        }
+                        if widgets::icon_pill(ui, "github", "GitHub Profile", false).clicked() {
+                            app.open_url("https://github.com/SarthAyush");
+                        }
                     });
                 });
+            ui.add_space(18.0);
+
+            // Interactive Drag & Drop Box
+            let (drop_rect, drop_resp) = ui.allocate_exact_size(vec2(ui.available_width(), 72.0), Sense::click());
+            let drop_press = theme::Press::track(ui, &drop_resp);
+            card_lift(ui, &t, drop_rect, drop_press);
+            let drop_fill = drop_press.fill(t.pasteboard, t.hover, t.pressed);
+            let drop_border = if drop_resp.hovered() { t.accent } else { t.border };
+            ui.painter().rect(drop_rect, CornerRadius::same(12), drop_fill, Stroke::new(1.5, drop_border), egui::StrokeKind::Inside);
+            let drop_body = drop_rect.translate(drop_press.offset());
+            icons::paint(ui, Rect::from_center_size(drop_body.left_center() + vec2(38.0, 0.0), vec2(30.0, 30.0)), "folder-open", 26.0, t.accent);
+            ui.painter().text(
+                drop_body.left_center() + vec2(72.0, -9.0),
+                Align2::LEFT_CENTER,
+                tl!("Open file"),
+                theme::semibold(14.5),
+                t.text,
+            );
+            ui.painter().text(
+                drop_body.left_center() + vec2(72.0, 11.0),
+                Align2::LEFT_CENTER,
+                "Drop any PDF document here to start editing immediately, or click to browse files",
+                theme::regular(12.0),
+                t.text_muted,
+            );
+            let browse_box = Rect::from_center_size(drop_body.right_center() - vec2(76.0, 0.0), vec2(110.0, 32.0));
+            ui.painter().rect(browse_box, CornerRadius::same(8), t.card, Stroke::new(1.0, t.border), egui::StrokeKind::Inside);
+            ui.painter().text(browse_box.center(), Align2::CENTER_CENTER, "Browse File", theme::semibold(12.5), t.accent_text);
+            if theme::hand(drop_resp).clicked() {
+                app.open_dialog();
+            }
+            ui.add_space(18.0);
+
+            // Capabilities Grid (4 Quick Launch Cards)
+            ui.label(egui::RichText::new("Studio Capabilities").font(theme::semibold(15.0)));
+            ui.add_space(8.0);
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
+                let w = ((ui.available_width() - 36.0) / 4.0).max(180.0);
+                
+                // 1. Reader
+                if workflow_card(
+                    ui, &t, "book-open", egui::Color32::from_rgb(0x3B, 0x82, 0xF6),
+                    "Viewer", "Document Reader",
+                    "High-DPI rendering, search, bookmarks & dual-page view.",
+                    "Open Reader", w
+                ).clicked() {
+                    app.switch_mode(Mode::Read, true);
+                }
+
+                // 2. Organizer
+                if workflow_card(
+                    ui, &t, "layers", egui::Color32::from_rgb(0x8B, 0x5C, 0xF6),
+                    "Pages", "Page Organizer",
+                    "Reorder, extract, rotate, split & merge pages easily.",
+                    "Organize", w
+                ).clicked() {
+                    app.select_tool("organize");
+                }
+
+                // 3. Forms & Annotations
+                if workflow_card(
+                    ui, &t, "pencil", egui::Color32::from_rgb(0xEC, 0x48, 0x99),
+                    "Forms", "Interactive Forms",
+                    "Fill and save PDF forms, add notes, highlights & stamps.",
+                    "Fill Forms", w
+                ).clicked() {
+                    app.select_tool("form");
+                }
+
+                // 4. Security & Privacy
+                if workflow_card(
+                    ui, &t, "lock", egui::Color32::from_rgb(0x10, 0xB9, 0x81),
+                    "Security", "Protect & Sign",
+                    "Digital signatures, password encryption & sanitize metadata.",
+                    "Protect", w
+                ).clicked() {
+                    app.select_tool("protect");
+                }
+            });
             ui.add_space(22.0);
 
             egui::Frame::NONE
@@ -229,12 +389,28 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             if clear {
                 app.execute("file.clear_recent");
             }
-            ui.add_space(20.0);
-            widgets::section_title(ui, tl!("Privacy"));
-            ui.label(
-                egui::RichText::new("CraftPDF works offline. No telemetry, no account, and no cloud processing unless you add a provider.")
-                    .color(t.text_muted),
-            );
+            ui.add_space(24.0);
+            egui::Frame::NONE
+                .fill(t.card)
+                .stroke(Stroke::new(1.0, t.border))
+                .corner_radius(CornerRadius::same(12))
+                .inner_margin(egui::Margin::symmetric(20, 16))
+                .show(ui, |ui| {
+                    ui.set_width(ui.available_width());
+                    ui.horizontal(|ui| {
+                        let (rect, _) = ui.allocate_exact_size(vec2(32.0, 32.0), Sense::hover());
+                        icons::paint(ui, rect, "shield-check", 28.0, egui::Color32::from_rgb(0x10, 0xB9, 0x81));
+                        ui.add_space(8.0);
+                        ui.vertical(|ui| {
+                            ui.label(egui::RichText::new("100% Offline & Private by Architecture").font(theme::semibold(14.0)).color(t.text));
+                            ui.label(
+                                egui::RichText::new("CraftPDF works completely offline. No telemetry, no remote analytics, no accounts, and zero cloud processing.")
+                                    .font(theme::regular(12.0))
+                                    .color(t.text_muted),
+                            );
+                        });
+                    });
+                });
         });
     });
 }
