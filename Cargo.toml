@@ -9,7 +9,8 @@ version = "0.7.1"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 rust-version = "1.95"
-repository = "https://github.com/storytold/pdfcraft"
+authors = ["Sarthak <sarthak.saxena.knp@gmail.com>"]
+repository = "https://github.com/SarthAyush/CraftPDF"
 
 [workspace.dependencies]
 # Shared frontend components; engines remain independent of egui.
@@ -100,6 +101,7 @@ incremental = false
 [profile.release]
 lto = "thin"
 codegen-units = 1
+strip = true
 
 # Vendored, patched third-party crates (see vendor/README.md). Each patch is meant to go upstream.
 [patch.crates-io]

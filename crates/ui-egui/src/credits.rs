@@ -3,6 +3,8 @@
 //! build.rs from contributors/contributors.json (craftrules standards/contributors.md); nothing is
 //! read at run time.
 
+#![allow(dead_code)]
+
 use std::cmp::Ordering;
 
 use egui::RichText;

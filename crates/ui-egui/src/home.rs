@@ -22,31 +22,56 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
     let t = Tokens::get(ui.ctx());
     egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
         egui::Frame::NONE.inner_margin(egui::Margin { left: 36, right: 36, top: 28, bottom: 28 }).show(ui, |ui| {
-            ui.label(egui::RichText::new(tl!("Welcome to PdfCraft")).font(theme::semibold(24.0)));
+            ui.horizontal(|ui| {
+                egui::Frame::NONE
+                    .fill(t.accent_soft)
+                    .corner_radius(CornerRadius::same(6))
+                    .inner_margin(egui::Margin::symmetric(8, 4))
+                    .show(ui, |ui| {
+                        ui.label(
+                            egui::RichText::new("✦ SARTHAYUSH EDITION")
+                                .font(theme::semibold(11.0))
+                                .color(t.accent_text)
+                                .extra_letter_spacing(0.6),
+                        );
+                    });
+            });
+            ui.add_space(6.0);
+            ui.label(egui::RichText::new("Welcome to CraftPDF").font(theme::semibold(25.0)).color(t.text));
             ui.label(
-                egui::RichText::new(tl!("An open-source PDF workbench — local, private, and scriptable."))
+                egui::RichText::new("High-performance personal PDF engineering workbench — local, private, and blazing fast.")
                     .color(t.text_muted)
                     .font(theme::regular(14.0)),
             );
             ui.add_space(14.0);
             egui::Frame::NONE
                 .fill(t.card)
-                .stroke(Stroke::new(1.0, t.border))
-                .corner_radius(CornerRadius::same(12))
-                .inner_margin(egui::Margin::same(14))
+                .stroke(Stroke::new(1.5, t.accent.gamma_multiply(0.35)))
+                .corner_radius(CornerRadius::same(14))
+                .inner_margin(egui::Margin::symmetric(18, 16))
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
                     ui.horizontal(|ui| {
-                        widgets::artcraft_mark(ui, 28.0);
+                        let (rect, _) = ui.allocate_exact_size(vec2(38.0, 38.0), Sense::hover());
+                        icons::paint(ui, rect, "github", 32.0, t.accent);
+                        ui.add_space(8.0);
                         ui.vertical(|ui| {
-                            ui.label(egui::RichText::new(tl!("Join the ArtCraft community")).font(theme::semibold(15.0)));
-                            ui.label(egui::RichText::new(tl!("Get help, share feedback and follow development on Discord.")).color(t.text_muted));
+                            ui.label(egui::RichText::new("CraftPDF by SarthAyush").font(theme::semibold(16.0)).color(t.text));
+                            ui.horizontal(|ui| {
+                                ui.spacing_mut().item_spacing = vec2(6.0, 2.0);
+                                ui.label(egui::RichText::new("⚡ Pure Rust").font(theme::medium(11.5)).color(t.text_muted));
+                                ui.label(egui::RichText::new("·").color(t.text_faint));
+                                ui.label(egui::RichText::new("🔒 100% Local & Private").font(theme::medium(11.5)).color(t.text_muted));
+                                ui.label(egui::RichText::new("·").color(t.text_faint));
+                                ui.label(egui::RichText::new("🚀 GPU Accelerated").font(theme::medium(11.5)).color(t.text_muted));
+                            });
+                        });
+                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                            if widgets::icon_pill(ui, "github", "GitHub Profile", true).clicked() {
+                                app.open_url("https://github.com/SarthAyush");
+                            }
                         });
                     });
-                    ui.add_space(8.0);
-                    if let Some(cmd) = widgets::community_links(ui) {
-                        app.execute(cmd);
-                    }
                 });
             ui.add_space(22.0);
 
@@ -141,7 +166,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             });
             ui.add_space(8.0);
             if app.recent.is_empty() {
-                ui.label(egui::RichText::new(tl!("Files you open in PdfCraft appear here. Drop a PDF anywhere to open it.")).color(t.text_muted));
+                ui.label(egui::RichText::new("Files you open in CraftPDF appear here. Drop a PDF anywhere to open it.").color(t.text_muted));
             }
             let mut open = None;
             let mut remove = None;
@@ -207,7 +232,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             ui.add_space(20.0);
             widgets::section_title(ui, tl!("Privacy"));
             ui.label(
-                egui::RichText::new(tl!("PdfCraft works offline. No telemetry, no account, and no cloud processing unless you add a provider."))
+                egui::RichText::new("CraftPDF works offline. No telemetry, no account, and no cloud processing unless you add a provider.")
                     .color(t.text_muted),
             );
         });

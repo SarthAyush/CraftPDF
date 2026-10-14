@@ -11,22 +11,22 @@ mod windows_manifest;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=../../assets/app-icon/pdfcraft.ico");
-    println!("cargo:rerun-if-changed=../../assets/app-icon/pdfcraft-document.ico");
+    println!("cargo:rerun-if-changed=../../assets/app-icon/craftpdf.ico");
+    println!("cargo:rerun-if-changed=../../assets/app-icon/craftpdf-document.ico");
     println!("cargo:rerun-if-changed=src/windows_manifest.rs");
     println!("cargo:rerun-if-env-changed=PDFCRAFT_REQUIRE_WINRES");
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {
         return;
     }
     let mut res = winresource::WindowsResource::new();
-    res.set_icon("../../assets/app-icon/pdfcraft.ico")
-        .set_icon_with_id("../../assets/app-icon/pdfcraft-document.ico", "2")
+    res.set_icon("../../assets/app-icon/craftpdf.ico")
+        .set_icon_with_id("../../assets/app-icon/craftpdf-document.ico", "2")
         .set_manifest(windows_manifest::WINDOWS_MANIFEST)
-        .set("ProductName", "PdfCraft")
-        .set("FileDescription", "PdfCraft PDF workbench")
-        .set("LegalCopyright", "Copyright (c) the PdfCraft contributors. MIT OR Apache-2.0.")
-        .set("OriginalFilename", "pdfcraft.exe")
-        .set("InternalName", "pdfcraft");
+        .set("ProductName", "CraftPDF")
+        .set("FileDescription", "CraftPDF")
+        .set("LegalCopyright", "CraftPDF by SarthAyush. All rights reserved.")
+        .set("OriginalFilename", "CraftPDF.exe")
+        .set("InternalName", "craftpdf");
     if let Err(e) = res.compile() {
         if std::env::var_os("PDFCRAFT_REQUIRE_WINRES").is_some() {
             println!("cargo::error=embedding Windows resources failed: {e}");

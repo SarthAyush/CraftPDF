@@ -1,6 +1,6 @@
 //! Modal dialogs: Document Properties, Keyboard Shortcuts, About (with the Contributors and Models credits).
 
-use egui::{Align, Layout};
+use egui::{Align, CornerRadius, Layout, Sense, Stroke, vec2};
 
 use crate::theme::{self, Tokens};
 use pdfcraft_engine::Edit;
@@ -1007,7 +1007,7 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                     ui.label(egui::RichText::new(tl!("Recover unsaved documents?")).font(theme::semibold(18.0)));
                 });
                 ui.add_space(6.0);
-                ui.label(tl!("PdfCraft didn't shut down normally. These documents had changes that were autosaved:"));
+                ui.label("CraftPDF didn't shut down normally. These documents had changes that were autosaved:");
                 ui.add_space(8.0);
                 let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
                 egui::Grid::new("recoverable").num_columns(2).spacing([18.0, 6.0]).show(ui, |ui| {
@@ -1078,50 +1078,84 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 });
             }
             Dialog::About => {
-                // Tabs About · Contributors · Models (craftrules standards/contributors.md).
-                let tab_id = egui::Id::new("about_tab");
-                let mut tab = ui.data_mut(|d| d.get_temp::<u8>(tab_id)).unwrap_or(0);
-                ui.horizontal_wrapped(|ui| {
-                    for (i, label) in ["About", "Contributors", "Models"].into_iter().enumerate() {
-                        let i = i as u8;
-                        if widgets::mode_tab(ui, tl!(label), tab == i).clicked() {
-                            tab = i;
-                        }
-                    }
-                });
-                ui.data_mut(|d| d.insert_temp(tab_id, tab));
-                ui.separator();
-                match tab {
-                    1 => crate::credits::contributors_ui(ui),
-                    2 => crate::credits::models_ui(ui),
-                    _ => {
+                ui.set_width(460.0);
+                egui::Frame::NONE
+                    .fill(t.accent_soft)
+                    .corner_radius(CornerRadius::same(12))
+                    .stroke(Stroke::new(1.0, t.accent.gamma_multiply(0.4)))
+                    .inner_margin(egui::Margin::symmetric(18, 14))
+                    .show(ui, |ui| {
                         ui.horizontal(|ui| {
-                            widgets::artcraft_mark(ui, 40.0);
+                            let (rect, _) = ui.allocate_exact_size(vec2(44.0, 44.0), Sense::hover());
+                            crate::icons::paint(ui, rect, "file-text", 36.0, t.accent);
+                            ui.add_space(8.0);
                             ui.vertical(|ui| {
-                                ui.label(egui::RichText::new("PdfCraft").font(theme::semibold(20.0)));
-                                ui.label(crate::i18n::fmt(tl!("Version {v}"), &[("v", &pdfcraft_engine::build_info::version())]));
+                                ui.label(egui::RichText::new("CraftPDF").font(theme::semibold(24.0)).color(t.text));
+                                let v_text = format!("v{} · Studio Edition", pdfcraft_engine::build_info::version());
+                                ui.label(egui::RichText::new(v_text).font(theme::medium(12.0)).color(t.accent_text));
                             });
                         });
-                        ui.add_space(6.0);
-                        ui.label(tl!("A clean-room, open-source PDF application written in Rust. MIT OR Apache-2.0."));
+                    });
+
+                ui.add_space(14.0);
+                ui.label(
+                    egui::RichText::new("A modern, personalized PDF engineering workbench — local, private, and blazing fast.")
+                        .font(theme::regular(13.5))
+                        .color(t.text),
+                );
+                ui.add_space(14.0);
+
+                // Dedicated Developer card exclusively for SarthAyush
+                egui::Frame::NONE
+                    .fill(t.card)
+                    .corner_radius(CornerRadius::same(12))
+                    .stroke(Stroke::new(1.0, t.border))
+                    .inner_margin(egui::Margin::same(16))
+                    .show(ui, |ui| {
+                        ui.set_width(ui.available_width());
                         ui.label(
-                            egui::RichText::new(
-                                "Rendering: hayro (bootstrap) · UI: egui · Icons: Lucide (ISC) · Fonts: Inter, JetBrains Mono, Dancing Script (OFL)",
-                            )
-                            .color(t.text_muted)
-                            .small(),
+                            egui::RichText::new("LEAD DEVELOPER & MAINTAINER")
+                                .font(theme::semibold(10.5))
+                                .color(t.accent_text)
+                                .extra_letter_spacing(0.8),
                         );
+                        ui.add_space(6.0);
+                        ui.horizontal(|ui| {
+                            let (rect, _) = ui.allocate_exact_size(vec2(28.0, 28.0), Sense::hover());
+                            crate::icons::paint(ui, rect, "github", 24.0, t.accent);
+                            ui.add_space(6.0);
+                            ui.vertical(|ui| {
+                                ui.label(egui::RichText::new("SarthAyush").font(theme::semibold(17.0)).color(t.text));
+                                ui.label(
+                                    egui::RichText::new("Customized, engineered & maintained by SarthAyush.")
+                                        .color(t.text_muted)
+                                        .font(theme::regular(12.5)),
+                                );
+                            });
+                        });
                         ui.add_space(12.0);
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new(tl!("Part of")).color(t.text_muted));
-                            widgets::artcraft_logo(ui, 16.0);
+                            if widgets::icon_pill(ui, "github", "github.com/SarthAyush", true).clicked() {
+                                app.open_url("https://github.com/SarthAyush");
+                            }
                         });
-                        ui.add_space(6.0);
-                        if let Some(cmd) = widgets::community_links(ui) {
-                            link_command = Some(cmd);
-                        }
-                    }
-                }
+                    });
+
+                ui.add_space(12.0);
+                egui::Frame::NONE
+                    .fill(t.hover)
+                    .corner_radius(CornerRadius::same(8))
+                    .inner_margin(egui::Margin::symmetric(12, 8))
+                    .show(ui, |ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            ui.spacing_mut().item_spacing = vec2(10.0, 4.0);
+                            ui.label(egui::RichText::new("⚡ Pure Rust (hayro)").font(theme::medium(11.5)).color(t.text_muted));
+                            ui.label(egui::RichText::new("·").color(t.text_faint));
+                            ui.label(egui::RichText::new("🔒 100% Local & Private").font(theme::medium(11.5)).color(t.text_muted));
+                            ui.label(egui::RichText::new("·").color(t.text_faint));
+                            ui.label(egui::RichText::new("🎨 Hardware Accelerated").font(theme::medium(11.5)).color(t.text_muted));
+                        });
+                    });
             }
         }
         ui.add_space(16.0);
