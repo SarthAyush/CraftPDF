@@ -2,7 +2,9 @@
 ; Designed for SarthAyush
 
 #define MyAppName "CraftPDF"
-#define MyAppVersion "0.7.1"
+#ifndef MyAppVersion
+  #define MyAppVersion "0.7.1"
+#endif
 #define MyAppPublisher "SarthAyush"
 #define MyAppURL "https://github.com/SarthAyush"
 #define MyAppExeName "CraftPDF.exe"
