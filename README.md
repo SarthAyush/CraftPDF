@@ -17,6 +17,26 @@
   <b>Maintained by Sarthak (<a href="https://github.com/SarthAyush">@SarthAyush</a>)</b>
 </p>
 
+<p align="center">
+  <a href="https://github.com/SarthAyush/CraftPDF/releases/latest/download/CraftPDF.exe">
+    <img src="https://img.shields.io/badge/Download-Direct%20.EXE%20(Windows%20x64)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Direct EXE" height="40">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/SarthAyush/CraftPDF/releases">
+    <img src="https://img.shields.io/badge/All%20Releases-GitHub-238636?style=for-the-badge&logo=github&logoColor=white" alt="All Releases" height="40">
+  </a>
+</p>
+
+---
+
+## 📥 Downloads
+
+| Platform | Package | Direct Download Link |
+| :--- | :--- | :--- |
+| **Windows (x64)** | **Direct Standalone `.exe`** | [**CraftPDF.exe**](https://github.com/SarthAyush/CraftPDF/releases/latest/download/CraftPDF.exe) |
+| **Windows (x64)** | **Full Setup Installer** | [**CraftPDF-Setup.exe**](https://github.com/SarthAyush/CraftPDF/releases/latest/download/CraftPDF-Setup.exe) |
+| **All Platforms** | **Release Assets & Notes** | [**View GitHub Releases**](https://github.com/SarthAyush/CraftPDF/releases) |
+
 ---
 
 ## ⚡ Highlights
