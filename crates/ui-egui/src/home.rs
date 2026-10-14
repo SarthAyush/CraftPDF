@@ -18,6 +18,148 @@ fn card_lift(ui: &egui::Ui, t: &Tokens, rect: Rect, press: theme::Press) {
     }
 }
 
+struct DesignTemplate {
+    category: usize,
+    badge: &'static str,
+    title: &'static str,
+    desc: &'static str,
+    dim_label: &'static str,
+    icon: &'static str,
+    hue: Color32,
+    default_filename: &'static str,
+    width: f64,
+    height: f64,
+    pages: usize,
+}
+
+const TEMPLATES: [DesignTemplate; 6] = [
+    DesignTemplate {
+        category: 1,
+        badge: "Standard",
+        title: "Blank Canvas",
+        desc: "Clean white letter-sized sheet, ready for adding text, vectors, annotations and signatures.",
+        dim_label: "Letter · 8.5\" × 11\"",
+        icon: "file-plus-2",
+        hue: Color32::from_rgb(0x3B, 0x82, 0xF6),
+        default_filename: "Blank Document.pdf",
+        width: 612.0,
+        height: 792.0,
+        pages: 1,
+    },
+    DesignTemplate {
+        category: 3,
+        badge: "Finance",
+        title: "Modern Invoice",
+        desc: "Professional layout tailored for client invoicing, itemized billing tables, and bank details.",
+        dim_label: "A4 · 210 × 297 mm",
+        icon: "file-spreadsheet",
+        hue: Color32::from_rgb(0x10, 0xB9, 0x81),
+        default_filename: "Invoice Template.pdf",
+        width: 595.28,
+        height: 841.89,
+        pages: 1,
+    },
+    DesignTemplate {
+        category: 3,
+        badge: "3 Pages",
+        title: "Project Proposal",
+        desc: "Complete executive proposal featuring Title Cover, Scope of Work, and Project Timeline.",
+        dim_label: "Letter · 3 Pages",
+        icon: "file-text",
+        hue: Color32::from_rgb(0x8B, 0x5C, 0xF6),
+        default_filename: "Project Proposal.pdf",
+        width: 612.0,
+        height: 792.0,
+        pages: 3,
+    },
+    DesignTemplate {
+        category: 1,
+        badge: "Career",
+        title: "Professional Resume",
+        desc: "Clean two-column CV template highlighting experience, technical skills, and achievements.",
+        dim_label: "Letter · 8.5\" × 11\"",
+        icon: "file-check",
+        hue: Color32::from_rgb(0xEC, 0x48, 0x99),
+        default_filename: "Resume Template.pdf",
+        width: 612.0,
+        height: 792.0,
+        pages: 1,
+    },
+    DesignTemplate {
+        category: 2,
+        badge: "Technical",
+        title: "Engineering Notebook",
+        desc: "Multi-page technical journal with standard margins and 5mm grid structure for formulas and sketches.",
+        dim_label: "A4 · 2 Pages",
+        icon: "grid-3x3",
+        hue: Color32::from_rgb(0xF5, 0x9E, 0x0B),
+        default_filename: "Engineering Notebook.pdf",
+        width: 595.28,
+        height: 841.89,
+        pages: 2,
+    },
+    DesignTemplate {
+        category: 2,
+        badge: "Landscape",
+        title: "Award Certificate",
+        desc: "Distinguished certificate template featuring perimeter framing, presentation header, and signature lines.",
+        dim_label: "11\" × 8.5\" · Landscape",
+        icon: "badge-check",
+        hue: Color32::from_rgb(0x06, 0xB6, 0xD4),
+        default_filename: "Certificate of Completion.pdf",
+        width: 792.0,
+        height: 612.0,
+        pages: 1,
+    },
+];
+
+fn template_card(
+    ui: &mut egui::Ui,
+    t: &Tokens,
+    tmpl: &DesignTemplate,
+    width: f32,
+) -> egui::Response {
+    let (rect, resp) = ui.allocate_exact_size(vec2(width, 130.0), Sense::click());
+    resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, tmpl.title));
+    let press = theme::Press::track(ui, &resp);
+    card_lift(ui, t, rect, press);
+    let fill = press.fill(t.card, t.hover, t.pressed);
+    let border_color = if resp.hovered() { tmpl.hue.gamma_multiply(0.8) } else { t.border };
+    ui.painter().rect(rect, CornerRadius::same(12), fill, Stroke::new(1.2, border_color), egui::StrokeKind::Inside);
+    let body = rect.translate(press.offset());
+
+    icons::paint(ui, Rect::from_min_size(body.min + vec2(14.0, 14.0), vec2(20.0, 20.0)), tmpl.icon, 19.0, tmpl.hue);
+
+    let badge_job = egui::text::LayoutJob::simple_singleline(tmpl.badge.to_uppercase(), theme::semibold(9.5), tmpl.hue);
+    let badge_galley = ui.fonts_mut(|f| f.layout_job(badge_job));
+    ui.painter().galley(body.min + vec2(40.0, 16.0), badge_galley, tmpl.hue);
+
+    let dim_job = egui::text::LayoutJob::simple_singleline(tmpl.dim_label.to_owned(), theme::medium(10.0), t.text_faint);
+    let dim_galley = ui.fonts_mut(|f| f.layout_job(dim_job));
+    ui.painter().galley(body.right_top() + vec2(-dim_galley.size().x - 14.0, 16.0), dim_galley, t.text_faint);
+
+    let mut title_job = egui::text::LayoutJob::simple_singleline(tmpl.title.to_owned(), theme::semibold(13.5), t.text);
+    title_job.wrap = egui::text::TextWrapping::truncate_at_width((body.width() - 28.0).max(10.0));
+    let title_galley = ui.fonts_mut(|f| f.layout_job(title_job));
+    ui.painter().galley(body.min + vec2(14.0, 42.0), title_galley, t.text);
+
+    let mut desc_job = egui::text::LayoutJob::simple(tmpl.desc.to_owned(), theme::regular(11.0), t.text_muted, (body.width() - 28.0).max(10.0));
+    desc_job.wrap.max_rows = 2;
+    let desc_galley = ui.fonts_mut(|f| f.layout_job(desc_job));
+    ui.painter().galley(body.min + vec2(14.0, 62.0), desc_galley, t.text_muted);
+
+    let action_text = if resp.hovered() { "Create & Open Now →" } else { "Create Template →" };
+    ui.painter().text(
+        body.left_bottom() + vec2(14.0, -14.0),
+        Align2::LEFT_CENTER,
+        action_text,
+        theme::semibold(11.5),
+        if resp.hovered() { tmpl.hue } else { t.accent_text },
+    );
+
+    theme::hand(resp)
+}
+
 fn workflow_card(
     ui: &mut egui::Ui,
     t: &Tokens,
@@ -98,7 +240,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(8, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("v0.8.0")
+                                    egui::RichText::new(format!("v{}", env!("CARGO_PKG_VERSION")))
                                         .font(theme::medium(11.0))
                                         .color(t.text_muted),
                                 );
@@ -148,8 +290,8 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         if widgets::pill_button(ui, "🛠️ All Tools Suite", false).clicked() {
                             app.switch_mode(Mode::AllTools, true);
                         }
-                        if widgets::icon_pill(ui, "github", "GitHub Profile", false).clicked() {
-                            app.open_url("https://github.com/SarthAyush");
+                        if widgets::icon_pill(ui, "github", "GitHub Repository", false).clicked() {
+                            app.open_url("https://github.com/SarthAyush/CraftPDF");
                         }
                     });
                 });
@@ -184,7 +326,63 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             if theme::hand(drop_resp).clicked() {
                 app.open_dialog();
             }
-            ui.add_space(18.0);
+            ui.add_space(20.0);
+
+            // Interactive Design Templates Section
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new("Interactive Design Templates").font(theme::semibold(16.0)).color(t.text));
+                ui.add_space(8.0);
+                egui::Frame::NONE
+                    .fill(t.accent_soft)
+                    .corner_radius(CornerRadius::same(6))
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .show(ui, |ui| {
+                        ui.label(egui::RichText::new("NEW").font(theme::semibold(10.0)).color(t.accent_text));
+                    });
+            });
+            ui.add_space(2.0);
+            ui.label(
+                egui::RichText::new("Jump-start documents with instant pre-configured formats — zero setup required.")
+                    .font(theme::regular(12.5))
+                    .color(t.text_muted),
+            );
+            ui.add_space(10.0);
+
+            // Category Filter Tabs
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing = vec2(8.0, 0.0);
+                for (name, id) in [
+                    ("✦ All Templates", 0),
+                    ("📑 Documents", 1),
+                    ("📐 Engineering", 2),
+                    ("💼 Business", 3),
+                ] {
+                    let active = app.home_template_tab == id;
+                    if widgets::pill_button(ui, name, active).clicked() {
+                        app.home_template_tab = id;
+                    }
+                }
+            });
+            ui.add_space(12.0);
+
+            // Templates Grid (3 columns on wide screens)
+            let mut chosen_template: Option<(&'static str, f64, f64, usize)> = None;
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
+                let w = ((ui.available_width() - 24.0) / 3.0).max(210.0);
+                for tmpl in &TEMPLATES {
+                    if app.home_template_tab != 0 && tmpl.category != app.home_template_tab {
+                        continue;
+                    }
+                    if template_card(ui, &t, tmpl, w).clicked() {
+                        chosen_template = Some((tmpl.default_filename, tmpl.width, tmpl.height, tmpl.pages));
+                    }
+                }
+            });
+            if let Some((name, w, h, pages)) = chosen_template {
+                app.create_template_document(name, w, h, pages);
+            }
+            ui.add_space(22.0);
 
             // Capabilities Grid (4 Quick Launch Cards)
             ui.label(egui::RichText::new("Studio Capabilities").font(theme::semibold(15.0)));

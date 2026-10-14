@@ -773,6 +773,10 @@ pub struct PdfCraftApp {
     pub pending_link: Option<PendingLink>,
     /// An absolute GoToR target waiting for approval, before any target-file I/O (#1364).
     pub pending_remote_link: Option<PendingRemoteLink>,
+    /// Notification viewer panel on the top-right corner.
+    pub notification_viewer_open: bool,
+    /// Active tab in the home design template hub (0 = Quick Studio, 1 = Templates, 2 = Tools, 3 = Recent).
+    pub home_template_tab: usize,
 }
 
 /// Where in a document a request to open an address came from.
@@ -1028,6 +1032,24 @@ impl PdfCraftApp {
             text_style: content_ui::default_style(),
             replace_draft: None,
             number_draft: NumberDraft { from: 1, to: 1, style: pdfcraft_engine::LabelStyle::Decimal, prefix: String::new(), start: 1 },
+            notification_viewer_open: false,
+            home_template_tab: 0,
+        }
+    }
+
+    /// Whether a newer version is known to be available on GitHub.
+    pub fn has_update_available(&self) -> bool {
+        match &self.updates.check {
+            updates::Check::Done(Ok(release)) => updates::is_newer(&release.version, env!("CARGO_PKG_VERSION")),
+            _ => false,
+        }
+    }
+
+    /// Creates and opens a new template document with standard dimensions.
+    pub fn create_template_document(&mut self, name: &str, width: f64, height: f64, pages: usize) {
+        let created = self.session.create_blank(width, height, pages).map_err(|e| e.to_string());
+        if let Err(e) = self.open_created_bytes(name, created) {
+            self.notify_fmt("Couldn't create template: {e}", &[("e", &e.to_string())]);
         }
     }
 
@@ -2915,6 +2937,7 @@ impl eframe::App for PdfCraftApp {
         self.process_pending_edits();
         palette::show(self, &ctx);
         dialogs::show(self, &ctx);
+        chrome::notification_viewer(self, &ctx);
         self.show_progress(&ctx);
         widgets::toast(self, &ctx);
         self.finish_render_frame(&ctx);

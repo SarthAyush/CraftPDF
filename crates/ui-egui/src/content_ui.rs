@@ -46,9 +46,9 @@ pub(crate) fn undrawable_message(c: char) -> String {
 /// field, which other viewers redraw from its value, or a comment, where the `?` shows everywhere).
 pub(crate) fn undrawn_message(n: &pdfcraft_engine::TextNotice) -> String {
     let template = if n.redrawn_elsewhere {
-        "This field's font can't draw “{c}” ({code}), so CraftPDF shows ? in its place. The value is saved, and other PDF viewers redraw the field from it."
+        tl!("This field's font can't draw “{c}” ({code}), so PdfCraft shows ? in its place. The value is saved, and other PDF viewers redraw the field from it.")
     } else {
-        "The fonts CraftPDF writes with can't draw “{c}” ({code}), so it shows as ? in every PDF viewer. The text is saved."
+        tl!("The fonts PdfCraft writes with can't draw “{c}” ({code}), so it shows as ? in every PDF viewer. The text is saved.")
     };
     crate::i18n::fmt(template, &[("c", &n.ch.to_string()), ("code", &format!("U+{:04X}", u32::from(n.ch)))])
 }

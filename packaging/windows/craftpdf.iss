@@ -3,10 +3,10 @@
 
 #define MyAppName "CraftPDF"
 #ifndef MyAppVersion
-  #define MyAppVersion "0.8.0"
+  #define MyAppVersion "0.8.1"
 #endif
 #define MyAppPublisher "SarthAyush"
-#define MyAppURL "https://github.com/SarthAyush"
+#define MyAppURL "https://github.com/SarthAyush/CraftPDF"
 #define MyAppExeName "CraftPDF.exe"
 
 [Setup]

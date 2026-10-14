@@ -52,8 +52,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.active = None;
                     app.combine_tab.focused = false;
                 }
-                // Keep the two icon buttons, GitHub's text/padding and three gaps outside the scrolling tabs.
-                let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 2.0 * button + 50.0;
+                // Keep the three icon buttons, GitHub's text/padding and four gaps outside the scrolling tabs.
+                let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 3.0 * button + 64.0;
                 // Open stays in sight after the tabs: its icon, text and padding, and the gaps around it.
                 let open_width = ui.fonts_mut(|f| f.layout_no_wrap(tl!("Open").into(), theme::medium(13.0), t.text).size().x) + 38.0 + 12.0;
                 let mut tabs_width = (ui.available_width() - controls_width - open_width).max(0.0);
@@ -194,6 +194,23 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.open_dialog();
                 }
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                    // Rightmost corner: Notification Viewer Bell Button
+                    let has_update = app.has_update_available();
+                    let bell_tip = if has_update {
+                        "Updates & Notifications (Update available!)"
+                    } else {
+                        "Updates & Notifications"
+                    };
+                    let resp = icons::button(ui, "bell", button, app.notification_viewer_open, &bell_tip);
+                    if has_update {
+                        let dot_center = resp.rect.right_top() + vec2(-4.0, 4.0);
+                        ui.painter().circle_filled(dot_center, 3.5, Color32::from_rgb(0xe0, 0x40, 0x40));
+                        ui.painter().circle_stroke(dot_center, 3.5, Stroke::new(1.0, Color32::WHITE));
+                    }
+                    if resp.clicked() {
+                        app.notification_viewer_open = !app.notification_viewer_open;
+                    }
+
                     let (icon, label) = match app.theme_preference {
                         ThemePreference::System => ("monitor", tl!("Use system setting")),
                         ThemePreference::Light => ("sun", tl!("Light gray")),
@@ -213,9 +230,12 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     if icons::button(ui, "circle-help", button, false, tl!("Keyboard shortcuts")).clicked() {
                         app.dialog = Some(Dialog::Shortcuts);
                     }
-                    // One click to the GitHub profile, from anywhere in the app.
-                    if widgets::ghost_button_sized(ui, "github", "GitHub", tab_h).on_hover_text("https://github.com/SarthAyush").clicked() {
-                        app.open_url("https://github.com/SarthAyush");
+                    // One click to the GitHub repository, from anywhere in the app.
+                    if widgets::ghost_button_sized(ui, "github", "GitHub", tab_h)
+                        .on_hover_text("https://github.com/SarthAyush/CraftPDF")
+                        .clicked()
+                    {
+                        app.open_url("https://github.com/SarthAyush/CraftPDF");
                     }
                 });
             });
@@ -246,6 +266,164 @@ fn appearance_menu(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
     if ui.button(tl!("Appearance settings…")).clicked() {
         app.dialog = Some(Dialog::Preferences);
         ui.close();
+    }
+}
+
+/// Interactive notification viewer overlay in the top-right corner.
+pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
+    if !app.notification_viewer_open {
+        return;
+    }
+
+    let t = Tokens::get(ctx);
+    let screen = ctx.content_rect();
+    let mac = cfg!(target_os = "macos") && app.integrated_titlebar;
+    let top_y = if mac { MAC_TITLE_BAR } else { TAB_STRIP } + 6.0;
+
+    let mut close = false;
+    let mut check_now = false;
+    let mut open_target_url = None;
+
+    egui::Area::new(egui::Id::new("notification_viewer_panel"))
+        .order(egui::Order::Foreground)
+        .pivot(Align2::RIGHT_TOP)
+        .fixed_pos(egui::pos2(screen.right() - 10.0, top_y))
+        .show(ctx, |ui| {
+            egui::Frame::NONE
+                .fill(t.card)
+                .stroke(Stroke::new(1.0, t.border))
+                .corner_radius(CornerRadius::same(12))
+                .shadow(egui::Shadow {
+                    offset: [0, 8],
+                    blur: 24,
+                    spread: 0,
+                    color: t.page_shadow.gamma_multiply(0.9),
+                })
+                .inner_margin(egui::Margin::symmetric(18, 16))
+                .show(ui, |ui| {
+                    ui.set_width(360.0);
+
+                    // Header row
+                    ui.horizontal(|ui| {
+                        icons::paint(ui, Rect::from_center_size(ui.cursor().min + vec2(10.0, 10.0), vec2(20.0, 20.0)), "bell", 18.0, t.accent);
+                        ui.add_space(24.0);
+                        ui.label(egui::RichText::new("Updates & Notifications").font(theme::semibold(15.0)).color(t.text));
+                        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                            if icons::button(ui, "x", 22.0, false, tl!("Close")).clicked() {
+                                close = true;
+                            }
+                        });
+                    });
+
+                    ui.add_space(10.0);
+                    ui.separator();
+                    ui.add_space(10.0);
+
+                    // Version status section
+                    let current_version = env!("CARGO_PKG_VERSION");
+                    let has_update = app.has_update_available();
+
+                    egui::Frame::NONE
+                        .fill(if has_update { t.accent_soft } else { t.hover })
+                        .stroke(Stroke::new(1.0, if has_update { t.accent } else { t.divider }))
+                        .corner_radius(CornerRadius::same(8))
+                        .inner_margin(egui::Margin::symmetric(14, 10))
+                        .show(ui, |ui| {
+                            ui.set_width(ui.available_width());
+                            ui.horizontal(|ui| {
+                                let (status_icon, icon_color) = if has_update {
+                                    ("sparkles", t.accent)
+                                } else {
+                                    ("check-circle-2", Color32::from_rgb(0x10, 0xB9, 0x81))
+                                };
+                                icons::paint(ui, Rect::from_center_size(ui.cursor().min + vec2(8.0, 8.0), vec2(18.0, 18.0)), status_icon, 16.0, icon_color);
+                                ui.add_space(20.0);
+                                ui.vertical(|ui| {
+                                    if has_update {
+                                        ui.label(egui::RichText::new("New Version Available!").font(theme::semibold(13.0)).color(t.accent_text));
+                                        if let crate::updates::Check::Done(Ok(release)) = &app.updates.check {
+                                            ui.label(egui::RichText::new(format!("Version {} is ready to download.", release.version)).font(theme::regular(11.5)).color(t.text));
+                                        }
+                                    } else {
+                                        ui.label(egui::RichText::new(format!("CraftPDF v{current_version}")).font(theme::semibold(13.0)).color(t.text));
+                                        ui.label(egui::RichText::new("You are running the latest version.").font(theme::regular(11.5)).color(t.text_muted));
+                                    }
+                                });
+                            });
+
+                            ui.add_space(8.0);
+                            ui.horizontal(|ui| {
+                                if has_update {
+                                    if ui.button(egui::RichText::new("⬇ Download Update").font(theme::semibold(12.0))).clicked() {
+                                        if let crate::updates::Check::Done(Ok(release)) = &app.updates.check {
+                                            open_target_url = Some(release.url.clone());
+                                        } else {
+                                            open_target_url = Some(crate::updates::RELEASES_PAGE.to_string());
+                                        }
+                                    }
+                                } else {
+                                    let is_checking = matches!(app.updates.check, crate::updates::Check::Running(_));
+                                    if is_checking {
+                                        ui.label(egui::RichText::new("Checking for updates…").font(theme::medium(11.5)).color(t.text_muted));
+                                    } else if ui.button(egui::RichText::new("🔄 Check for Updates").font(theme::medium(11.5))).clicked() {
+                                        check_now = true;
+                                    }
+                                }
+                            });
+                        });
+
+                    ui.add_space(14.0);
+                    ui.label(egui::RichText::new("What's New in CraftPDF").font(theme::semibold(13.0)).color(t.text));
+                    ui.add_space(6.0);
+
+                    // News / Changelog items
+                    let notes = [
+                        ("✨ Interactive Design Hub", "Create invoices, proposals, resumes, certificates, and dot-grid notebooks instantly with one click."),
+                        ("🔔 Real-time Notifications", "Top-right notification viewer keeps you informed of the latest updates and release highlights."),
+                        ("⚡ Instant Document Engine", "Generate blank sheets and multi-page templates directly in memory with zero wait."),
+                        ("🔒 Privacy-First Design", "100% offline, zero telemetry, local-only processing for complete document confidentiality."),
+                    ];
+
+                    for (title, desc) in notes {
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new("•").color(t.accent));
+                            ui.vertical(|ui| {
+                                ui.label(egui::RichText::new(title).font(theme::semibold(11.5)).color(t.text));
+                                ui.label(egui::RichText::new(desc).font(theme::regular(11.0)).color(t.text_muted));
+                            });
+                        });
+                        ui.add_space(6.0);
+                    }
+
+                    ui.add_space(8.0);
+                    ui.separator();
+                    ui.add_space(8.0);
+
+                    // Quick links
+                    ui.horizontal(|ui| {
+                        if ui.link(egui::RichText::new("GitHub Repository").font(theme::medium(11.5))).clicked() {
+                            open_target_url = Some("https://github.com/SarthAyush/CraftPDF".to_string());
+                        }
+                        ui.label("·");
+                        if ui.link(egui::RichText::new("All Releases").font(theme::medium(11.5))).clicked() {
+                            open_target_url = Some(crate::updates::RELEASES_PAGE.to_string());
+                        }
+                        ui.label("·");
+                        if ui.link(egui::RichText::new("Report Issue").font(theme::medium(11.5))).clicked() {
+                            open_target_url = Some("https://github.com/SarthAyush/CraftPDF/issues".to_string());
+                        }
+                    });
+                });
+        });
+
+    if let Some(url) = open_target_url {
+        app.open_url(&url);
+    }
+    if check_now {
+        app.check_for_updates();
+    }
+    if close || ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
+        app.notification_viewer_open = false;
     }
 }
 

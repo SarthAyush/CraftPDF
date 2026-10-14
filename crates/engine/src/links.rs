@@ -4,13 +4,16 @@
 use icu_properties::props::Script;
 use std::path::{Path, PathBuf};
 
-/// The app's name in ArtCraft URLs (`getartcraft.com/apps/{APP}`, `github.com/storytold/{APP}`).
-pub const APP: &str = "pdfcraft";
+pub const APP: &str = "CraftPDF";
 
-pub const DISCORD: &str = "https://discord.gg/artcraft";
-pub const WEBSITE: &str = "https://getartcraft.com";
-pub const APP_PAGE: &str = "https://getartcraft.com/apps/pdfcraft";
 pub const GITHUB: &str = "https://github.com/SarthAyush/CraftPDF";
+pub const RELEASES: &str = "https://github.com/SarthAyush/CraftPDF/releases";
+pub const ISSUES: &str = "https://github.com/SarthAyush/CraftPDF/issues";
+pub const AUTHOR: &str = "https://github.com/SarthAyush";
+
+pub const DISCORD: &str = GITHUB;
+pub const WEBSITE: &str = GITHUB;
+pub const APP_PAGE: &str = GITHUB;
 
 /// A link and the registry command that opens it.
 #[derive(Clone, Copy, Debug)]
@@ -22,12 +25,11 @@ pub struct Link {
     pub icon: &'static str,
 }
 
-/// In the order they are shown. Discord comes first: it is where people get help fastest.
 pub const LINKS: &[Link] = &[
-    Link { command: "help.discord", label: "Join the ArtCraft Discord", url: DISCORD, icon: "messages-square" },
-    Link { command: "help.app_page", label: "PdfCraft web page", url: APP_PAGE, icon: "globe" },
-    Link { command: "help.github", label: "PdfCraft on GitHub", url: GITHUB, icon: "code-xml" },
-    Link { command: "help.website", label: "ArtCraft website", url: WEBSITE, icon: "external-link" },
+    Link { command: "help.github", label: "CraftPDF on GitHub", url: GITHUB, icon: "github" },
+    Link { command: "help.discord", label: "CraftPDF Community", url: GITHUB, icon: "github" },
+    Link { command: "help.app_page", label: "CraftPDF Releases", url: RELEASES, icon: "file-down" },
+    Link { command: "help.website", label: "Developer Profile (@SarthAyush)", url: AUTHOR, icon: "user-round" },
 ];
 
 pub fn for_command(id: &str) -> Option<&'static Link> {
