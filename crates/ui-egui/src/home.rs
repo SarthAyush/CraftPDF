@@ -98,7 +98,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(8, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("v0.7.2")
+                                    egui::RichText::new("v0.8.0")
                                         .font(theme::medium(11.0))
                                         .color(t.text_muted),
                                 );
