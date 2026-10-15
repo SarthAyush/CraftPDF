@@ -329,13 +329,13 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                             .inner_margin(egui::Margin::symmetric(10, 8))
                             .show(ui, |ui| {
                                 ui.horizontal(|ui| {
-                                    ui.label(egui::RichText::new("✅").font(theme::semibold(14.0)));
-                                    ui.label(egui::RichText::new("Update package ready! Click Install to run setup.").font(theme::medium(12.0)).color(t.text));
+                                    ui.label(egui::RichText::new("Verified:").font(theme::semibold(12.0)).color(t.accent_text));
+                                    ui.label(egui::RichText::new("Update package ready. Click Install to run setup.").font(theme::medium(12.0)).color(t.text));
                                 });
                             });
                     }
                     DownloadState::Installing => {
-                        ui.label(egui::RichText::new("Setup wizard launched! Please follow prompts.").font(theme::medium(12.0)).color(t.text));
+                        ui.label(egui::RichText::new("Setup wizard launched. Please follow prompts.").font(theme::medium(12.0)).color(t.text));
                     }
                     DownloadState::Failed(err) => {
                         ui.label(egui::RichText::new(format!("Download failed: {err}")).font(theme::regular(12.0)).color(Color32::from_rgb(0xe0, 0x40, 0x40)));
@@ -383,7 +383,7 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         }
                         DownloadState::ReadyToInstall { path } => {
                             let p = path.clone();
-                            if widgets::pill_button(ui, "⚡ Install", true).clicked() {
+                            if widgets::pill_button(ui, "Install", true).clicked() {
                                 app.install_update(&p);
                             }
                             if widgets::pill_button(ui, tl!("Later"), false).clicked() {

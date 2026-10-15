@@ -1143,7 +1143,7 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         ui.separator();
                         ui.add_space(6.0);
                         ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new("💡").font(theme::regular(12.0)));
+                            ui.label(egui::RichText::new("Tech Byte:").font(theme::semibold(11.5)).color(t.accent));
                             ui.label(egui::RichText::new(crate::tech_jokes::current_joke()).font(theme::regular(11.5)).color(t.text_muted));
                         });
                     });
@@ -1156,11 +1156,11 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                     .show(ui, |ui| {
                         ui.horizontal_wrapped(|ui| {
                             ui.spacing_mut().item_spacing = vec2(10.0, 4.0);
-                            ui.label(egui::RichText::new("⚡ Pure Rust (hayro)").font(theme::medium(11.5)).color(t.text_muted));
+                            ui.label(egui::RichText::new("Pure Rust (hayro)").font(theme::medium(11.5)).color(t.text_muted));
                             ui.label(egui::RichText::new("·").color(t.text_faint));
-                            ui.label(egui::RichText::new("🔒 100% Local & Private").font(theme::medium(11.5)).color(t.text_muted));
+                            ui.label(egui::RichText::new("100% Local & Private").font(theme::medium(11.5)).color(t.text_muted));
                             ui.label(egui::RichText::new("·").color(t.text_faint));
-                            ui.label(egui::RichText::new("🎨 Hardware Accelerated").font(theme::medium(11.5)).color(t.text_muted));
+                            ui.label(egui::RichText::new("Hardware Accelerated").font(theme::medium(11.5)).color(t.text_muted));
                         });
                     });
             }

@@ -52,7 +52,7 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.active = None;
                     app.combine_tab.focused = false;
                 }
-                let reconfig_text = "⚙ Re-configured by Sarthak Saxena";
+                let reconfig_text = "Re-configured by Sarthak Saxena";
                 let reconfig_width = ui.fonts_mut(|f| f.layout_no_wrap(reconfig_text.into(), theme::medium(11.0), t.text).size().x) + 20.0;
                 // Keep the icon buttons, GitHub's text/padding, reconfig text and gaps outside the scrolling tabs.
                 let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 3.0 * button + 64.0 + reconfig_width;
@@ -247,7 +247,7 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         .inner_margin(egui::Margin::symmetric(8, 3))
                         .show(ui, |ui| {
                             ui.label(
-                                egui::RichText::new("⚙ Re-configured by Sarthak Saxena")
+                                egui::RichText::new("Re-configured by Sarthak Saxena")
                                     .font(theme::medium(10.5))
                                     .color(t.text_muted),
                             );
@@ -373,7 +373,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                                         match &app.updates.download_state {
                                             crate::updates::DownloadState::Idle | crate::updates::DownloadState::Failed(_) => {
                                                 let rel = release.clone();
-                                                if ui.button(egui::RichText::new("⬇ Download Update").font(theme::semibold(12.0))).clicked() {
+                                                if ui.button(egui::RichText::new("Download Update").font(theme::semibold(12.0))).clicked() {
                                                     app.start_update_download(rel);
                                                 }
                                             }
@@ -388,7 +388,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                                             }
                                             crate::updates::DownloadState::ReadyToInstall { path } => {
                                                 let path_clone = path.clone();
-                                                if ui.button(egui::RichText::new("⚡ Install Update").font(theme::semibold(12.0))).clicked() {
+                                                if ui.button(egui::RichText::new("Install Update").font(theme::semibold(12.0))).clicked() {
                                                     app.install_update(&path_clone);
                                                 }
                                             }
@@ -401,7 +401,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                                     let is_checking = matches!(app.updates.check, crate::updates::Check::Running(_));
                                     if is_checking {
                                         ui.label(egui::RichText::new("Checking for updates…").font(theme::medium(11.5)).color(t.text_muted));
-                                    } else if ui.button(egui::RichText::new("🔄 Check for Updates").font(theme::medium(11.5))).clicked() {
+                                    } else if ui.button(egui::RichText::new("Check for Updates").font(theme::medium(11.5))).clicked() {
                                         check_now = true;
                                     }
                                 }
@@ -414,10 +414,10 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
 
                     // News / Changelog items
                     let notes = [
-                        ("✨ Interactive Design Hub", "Create invoices, proposals, resumes, certificates, and dot-grid notebooks instantly with one click."),
-                        ("🔔 Real-time Notifications", "Top-right notification viewer keeps you informed of the latest updates and release highlights."),
-                        ("⚡ Instant Document Engine", "Generate blank sheets and multi-page templates directly in memory with zero wait."),
-                        ("🔒 Privacy-First Design", "100% offline, zero telemetry, local-only processing for complete document confidentiality."),
+                        ("Interactive Design Hub", "Create invoices, proposals, resumes, certificates, and dot-grid notebooks instantly with one click."),
+                        ("Real-time Notifications", "Top-right notification viewer keeps you informed of the latest updates and release highlights."),
+                        ("Instant Document Engine", "Generate blank sheets and multi-page templates directly in memory with zero wait."),
+                        ("Privacy-First Design", "100% offline, zero telemetry, local-only processing for complete document confidentiality."),
                     ];
 
                     for (title, desc) in notes {

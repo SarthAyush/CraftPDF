@@ -237,7 +237,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(10, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("✦ CRAFTPDF STUDIO 2.0")
+                                    egui::RichText::new("CRAFTPDF STUDIO 2.0")
                                         .font(theme::semibold(11.0))
                                         .color(t.accent_text)
                                         .extra_letter_spacing(0.6),
@@ -264,7 +264,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(8, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("🦀 MEMORY-SAFE RUST")
+                                    egui::RichText::new("MEMORY-SAFE RUST")
                                         .font(theme::semibold(11.0))
                                         .color(t.accent_text),
                                 );
@@ -294,11 +294,11 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         .inner_margin(egui::Margin::symmetric(12, 7))
                         .show(ui, |ui| {
                             ui.horizontal(|ui| {
-                                ui.label(egui::RichText::new("💡 Tech Byte:").font(theme::semibold(12.0)).color(t.accent));
+                                ui.label(egui::RichText::new("Tech Byte:").font(theme::semibold(12.0)).color(t.accent));
                                 ui.add_space(4.0);
                                 ui.label(egui::RichText::new(crate::tech_jokes::current_joke()).font(theme::regular(12.0)).color(t.text));
                                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                                    if ui.small_button("🎲 Next Joke").clicked() {
+                                    if ui.small_button("Next Joke").clicked() {
                                         crate::tech_jokes::next_joke();
                                     }
                                 });
@@ -307,24 +307,27 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     ui.add_space(10.0);
                     ui.horizontal(|ui| {
                         ui.spacing_mut().item_spacing = vec2(6.0, 2.0);
-                        ui.label(egui::RichText::new("⚡ Pure Rust Engine").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("Pure Rust Engine").font(theme::medium(12.0)).color(t.text_muted));
                         ui.label(egui::RichText::new("·").color(t.text_faint));
-                        ui.label(egui::RichText::new("🔒 100% Offline & Private").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("100% Offline & Private").font(theme::medium(12.0)).color(t.text_muted));
                         ui.label(egui::RichText::new("·").color(t.text_faint));
-                        ui.label(egui::RichText::new("🚫 Zero Telemetry").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("Zero Telemetry").font(theme::medium(12.0)).color(t.text_muted));
                         ui.label(egui::RichText::new("·").color(t.text_faint));
-                        ui.label(egui::RichText::new("🚀 GPU Accelerated").font(theme::medium(12.0)).color(t.text_muted));
+                        ui.label(egui::RichText::new("GPU Accelerated").font(theme::medium(12.0)).color(t.text_muted));
                     });
                     ui.add_space(14.0);
                     ui.horizontal_wrapped(|ui| {
                         ui.spacing_mut().item_spacing = vec2(10.0, 8.0);
-                        if widgets::pill_button(ui, "⚡ Open PDF Document", true).clicked() {
+                        if widgets::pill_button(ui, "Open PDF Document", true).clicked() {
                             app.open_dialog();
                         }
-                        if widgets::pill_button(ui, "📑 Combine Files", false).clicked() {
+                        if widgets::pill_button(ui, "Combine Files", false).clicked() {
                             app.open_combine_tab();
                         }
-                        if widgets::pill_button(ui, "🛠️ All Tools Suite", false).clicked() {
+                        if widgets::pill_button(ui, "Batch Studio", false).clicked() {
+                            app.open_batch_studio();
+                        }
+                        if widgets::pill_button(ui, "All Tools Suite", false).clicked() {
                             app.switch_mode(Mode::AllTools, true);
                         }
                         if widgets::icon_pill(ui, "github", "GitHub Repository", false).clicked() {
@@ -389,10 +392,11 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing = vec2(8.0, 0.0);
                 for (name, id) in [
-                    ("✦ All Templates", 0),
-                    ("📑 Documents", 1),
-                    ("📐 Engineering", 2),
-                    ("💼 Business", 3),
+                    ("All Templates", 0),
+                    ("Documents", 1),
+                    ("Engineering", 2),
+                    ("Business", 3),
+                    ("Custom Library", 4),
                 ] {
                     let active = app.home_template_tab == id;
                     if widgets::pill_button(ui, name, active).clicked() {
@@ -404,39 +408,133 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
 
             // Templates Grid (3 columns on wide screens)
             let mut create_blank: Option<(&'static str, f64, f64, usize)> = None;
-            ui.horizontal_wrapped(|ui| {
-                ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
-                let w = ((ui.available_width() - 24.0) / 3.0).max(210.0);
-                for tmpl in &TEMPLATES {
-                    if app.home_template_tab != 0 && tmpl.category != app.home_template_tab {
-                        continue;
-                    }
-                    if template_card(ui, &t, tmpl, w).clicked() {
-                        if tmpl.category_key == "blank" {
-                            create_blank = Some((tmpl.default_filename, tmpl.width, tmpl.height, tmpl.pages));
-                        } else {
-                            app.template_picker = Some(crate::TemplatePickerState {
-                                category_key: tmpl.category_key,
-                                category_title: tmpl.title,
-                                default_filename: tmpl.default_filename,
-                                selected_style: 0,
-                                selected_color: 0,
-                            });
+            let mut open_custom: Option<(String, String, usize, [u8; 3])> = None;
+            let mut export_custom: Option<(String, String, usize, [u8; 3])> = None;
+            let mut delete_custom_id: Option<String> = None;
+
+            if app.home_template_tab == 4 {
+                // Personal Library tab
+                if app.custom_templates.is_empty() {
+                    egui::Frame::NONE
+                        .fill(t.card)
+                        .stroke(Stroke::new(1.0, t.border))
+                        .corner_radius(CornerRadius::same(12))
+                        .inner_margin(egui::Margin::symmetric(24, 20))
+                        .show(ui, |ui| {
+                            ui.set_width(ui.available_width());
+                            ui.label(egui::RichText::new("Your Personal Template Library is Empty").font(theme::semibold(14.5)).color(t.text));
+                            ui.add_space(4.0);
+                            ui.label(
+                                egui::RichText::new("Customize any parametric template from the tabs above (Documents, Engineering, Business) and click \"Save As Custom...\" to store reusable templates here.")
+                                    .font(theme::regular(12.0))
+                                    .color(t.text_muted),
+                            );
+                        });
+                } else {
+                    ui.horizontal_wrapped(|ui| {
+                        ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
+                        let w = ((ui.available_width() - 24.0) / 3.0).max(210.0);
+                        for ct in &app.custom_templates {
+                            egui::Frame::NONE
+                                .fill(t.card)
+                                .stroke(Stroke::new(1.0, t.border))
+                                .corner_radius(CornerRadius::same(12))
+                                .inner_margin(egui::Margin::same(14))
+                                .show(ui, |ui| {
+                                    ui.set_width(w);
+                                    ui.horizontal(|ui| {
+                                        let tag_col = Color32::from_rgb(ct.color_rgb[0], ct.color_rgb[1], ct.color_rgb[2]);
+                                        ui.painter().circle_filled(ui.cursor().min + vec2(6.0, 6.0), 5.0, tag_col);
+                                        ui.add_space(16.0);
+                                        ui.label(
+                                            egui::RichText::new(ct.category_key.to_uppercase())
+                                                .font(theme::semibold(9.5))
+                                                .color(t.accent_text),
+                                        );
+                                    });
+                                    ui.add_space(4.0);
+                                    ui.label(egui::RichText::new(&ct.title).font(theme::semibold(13.5)).color(t.text));
+                                    ui.label(egui::RichText::new(&ct.description).font(theme::regular(11.0)).color(t.text_muted));
+                                    ui.add_space(10.0);
+                                    ui.horizontal(|ui| {
+                                        if widgets::pill_button(ui, "Use Template", true).clicked() {
+                                            open_custom = Some((ct.default_filename.clone(), ct.category_key.clone(), ct.selected_style, ct.color_rgb));
+                                        }
+                                        ui.add_space(4.0);
+                                        if widgets::pill_button(ui, "Export", false).clicked() {
+                                            export_custom = Some((ct.default_filename.clone(), ct.category_key.clone(), ct.selected_style, ct.color_rgb));
+                                        }
+                                        ui.add_space(4.0);
+                                        if ui.small_button("×").on_hover_text("Delete from personal library").clicked() {
+                                            delete_custom_id = Some(ct.id.clone());
+                                        }
+                                    });
+                                });
+                        }
+                    });
+                }
+            } else {
+                ui.horizontal_wrapped(|ui| {
+                    ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
+                    let w = ((ui.available_width() - 24.0) / 3.0).max(210.0);
+                    for tmpl in &TEMPLATES {
+                        if app.home_template_tab != 0 && tmpl.category != app.home_template_tab {
+                            continue;
+                        }
+                        if template_card(ui, &t, tmpl, w).clicked() {
+                            if tmpl.category_key == "blank" {
+                                create_blank = Some((tmpl.default_filename, tmpl.width, tmpl.height, tmpl.pages));
+                            } else {
+                                app.template_picker = Some(crate::TemplatePickerState::new(
+                                    tmpl.category_key,
+                                    tmpl.title,
+                                    tmpl.default_filename,
+                                ));
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+
             if let Some((name, w, h, pages)) = create_blank {
                 app.create_template_document(name, w, h, pages);
             }
+            if let Some((name, cat, style, color)) = open_custom {
+                app.create_styled_template_document(&name, &cat, style, color);
+            }
+            if let Some((name, cat, style, color)) = export_custom {
+                let file_path = rfd::FileDialog::new()
+                    .set_title("Export Custom Template PDF")
+                    .set_file_name(&name)
+                    .add_filter("PDF Document", &["pdf"])
+                    .save_file();
+                if let Some(path) = file_path {
+                    match app.session.create_styled_template(&cat, style, color) {
+                        Ok(bytes) => {
+                            if std::fs::write(&path, &*bytes).is_ok() {
+                                app.toast = Some((format!("Exported template PDF to {}", path.file_name().and_then(|n| n.to_str()).unwrap_or("file.pdf")), 0.0));
+                            } else {
+                                app.toast = Some(("Failed to write exported PDF to disk".to_string(), 0.0));
+                            }
+                        }
+                        Err(e) => {
+                            app.toast = Some((format!("Export failed: {e}"), 0.0));
+                        }
+                    }
+                }
+            }
+            if let Some(del_id) = delete_custom_id {
+                app.custom_templates.retain(|c| c.id != del_id);
+                app.toast = Some(("Removed template from personal library".to_string(), 0.0));
+            }
             ui.add_space(22.0);
 
-            // Capabilities Grid (4 Quick Launch Cards)
+            // Capabilities Grid (5 Quick Launch Cards)
             ui.label(egui::RichText::new("Studio Capabilities").font(theme::semibold(15.0)));
             ui.add_space(8.0);
             ui.horizontal_wrapped(|ui| {
                 ui.spacing_mut().item_spacing = vec2(12.0, 12.0);
-                let w = ((ui.available_width() - 36.0) / 4.0).max(180.0);
+                let w = ((ui.available_width() - 48.0) / 5.0).max(160.0);
                 
                 // 1. Reader
                 if workflow_card(
@@ -476,6 +574,16 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     "Protect", w
                 ).clicked() {
                     app.select_tool("protect");
+                }
+
+                // 5. Batch Workflow Studio
+                if workflow_card(
+                    ui, &t, "folder-plus", egui::Color32::from_rgb(0xF5, 0x9E, 0x0B),
+                    "Batch", "Batch Studio",
+                    "Drop 20+ images/PDFs to merge, convert, compress or watermark.",
+                    "Open Studio", w
+                ).clicked() {
+                    app.open_batch_studio();
                 }
             });
             ui.add_space(22.0);

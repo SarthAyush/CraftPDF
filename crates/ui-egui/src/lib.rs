@@ -56,9 +56,11 @@ mod search_ui;
 mod sign_ui;
 mod stamps_ui;
 mod standards_ui;
+pub mod batch_studio;
+pub use batch_studio::{BatchFileKind, BatchItem, BatchOperation, BatchStudioState};
 mod template_picker;
+pub use template_picker::{CustomTemplate, TemplatePickerState};
 mod zoom_snap;
-pub use template_picker::TemplatePickerState;
 /// Header & footer / watermark / background dialog types (tests and automation).
 pub mod marks {
     pub use crate::marks_ui::{MarksDraft, PageRange, Subset};
@@ -780,10 +782,14 @@ pub struct PdfCraftApp {
     pub pending_remote_link: Option<PendingRemoteLink>,
     /// Notification viewer panel on the top-right corner.
     pub notification_viewer_open: bool,
-    /// Active tab in the home design template hub (0 = Quick Studio, 1 = Templates, 2 = Tools, 3 = Recent).
+    /// Active tab in the home design template hub (0 = Quick Studio, 1 = Templates, 2 = Tools, 3 = Recent, 4 = Custom Library).
     pub home_template_tab: usize,
     /// Active state for the template style picker modal.
     pub template_picker: Option<TemplatePickerState>,
+    /// Active state for the batch workflow studio modal.
+    pub batch_studio: Option<BatchStudioState>,
+    /// Saved custom parametric templates in personal library.
+    pub custom_templates: Vec<CustomTemplate>,
 }
 
 /// Where in a document a request to open an address came from.
@@ -1043,6 +1049,8 @@ impl PdfCraftApp {
             notification_viewer_open: false,
             home_template_tab: 0,
             template_picker: None,
+            batch_studio: None,
+            custom_templates: Vec::new(),
         }
     }
 
@@ -2137,6 +2145,7 @@ impl PdfCraftApp {
             "combine_zoom": self.combine_zoom,
             "comments_panel_closed": self.comments_panel_closed,
             "right_panel_closed": self.right_panel_closed,
+            "custom_templates": self.custom_templates,
         })
         .to_string()
     }
@@ -2200,6 +2209,9 @@ impl PdfCraftApp {
         }
         if let Some(closed) = v["right_panel_closed"].as_bool() {
             self.right_panel_closed = closed;
+        }
+        if let Ok(templates) = serde_json::from_value::<Vec<template_picker::CustomTemplate>>(v["custom_templates"].clone()) {
+            self.custom_templates = templates;
         }
         if let Some(defaults) = v["default_zoom"].as_str().and_then(|zoom| self.view_defaults.with_zoom(zoom)) {
             self.view_defaults = defaults;
@@ -2785,8 +2797,12 @@ impl eframe::App for PdfCraftApp {
         #[cfg(not(target_arch = "wasm32"))]
         let dropped = self.drop_on_grid(dropped, ctx);
         for f in dropped {
-            // Files dropped on the Combine files tab join its list instead of opening.
-            if self.combine_showing() {
+            if let Some(state) = &mut self.batch_studio {
+                let p = f.path();
+                if !p.as_os_str().is_empty() {
+                    state.add_paths(vec![p.to_path_buf()]);
+                }
+            } else if self.combine_showing() {
                 self.drop_into_combine(f, ctx);
             } else {
                 self.open_dropped(f, ctx);
@@ -2955,6 +2971,7 @@ impl eframe::App for PdfCraftApp {
         palette::show(self, &ctx);
         dialogs::show(self, &ctx);
         template_picker::show(self, &ctx);
+        batch_studio::show(self, &ctx);
         chrome::notification_viewer(self, &ctx);
         self.show_progress(&ctx);
         widgets::toast(self, &ctx);

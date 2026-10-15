@@ -1,4 +1,5 @@
-//! Template style picker modal: customizer for parametric PDF templates with color palettes and layout presets.
+//! Template style picker modal: customizer for parametric PDF templates with color palettes,
+//! layout presets, export capabilities, and personal library saving.
 
 use egui::{Align2, Color32, CornerRadius, Rect, Sense, Stroke, vec2};
 
@@ -11,6 +12,20 @@ pub struct TemplateStyleOption {
     pub badge: &'static str,
 }
 
+/// A user-saved reusable parametric template in their personal library.
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct CustomTemplate {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+    pub category_key: String,
+    pub default_filename: String,
+    pub selected_style: usize,
+    pub selected_color: usize,
+    pub color_rgb: [u8; 3],
+    pub created_at: String,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct TemplatePickerState {
     pub category_key: &'static str,
@@ -18,6 +33,24 @@ pub struct TemplatePickerState {
     pub default_filename: &'static str,
     pub selected_style: usize,
     pub selected_color: usize,
+    pub custom_title: String,
+    pub custom_desc: String,
+    pub show_save_drawer: bool,
+}
+
+impl TemplatePickerState {
+    pub fn new(category_key: &'static str, category_title: &'static str, default_filename: &'static str) -> Self {
+        Self {
+            category_key,
+            category_title,
+            default_filename,
+            selected_style: 0,
+            selected_color: 0,
+            custom_title: String::new(),
+            custom_desc: String::new(),
+            show_save_drawer: false,
+        }
+    }
 }
 
 pub const INVOICE_STYLES: &[TemplateStyleOption] = &[
@@ -112,6 +145,9 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
     let default_filename = picker.default_filename;
     let mut selected_style = picker.selected_style;
     let mut selected_color = picker.selected_color;
+    let mut custom_title = picker.custom_title.clone();
+    let mut custom_desc = picker.custom_desc.clone();
+    let mut show_save_drawer = picker.show_save_drawer;
 
     let t = Tokens::get(ctx);
     let styles = get_styles(category_key);
@@ -124,9 +160,11 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
 
     let mut close = false;
     let mut create = false;
+    let mut export_pdf = false;
+    let mut save_custom = false;
 
     let modal = widgets::show_modal(ctx, "template_style_picker", |ui| {
-        ui.set_width(620.0);
+        ui.set_width(640.0);
 
         // Header Title
         ui.horizontal(|ui| {
@@ -135,7 +173,7 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 .corner_radius(CornerRadius::same(6))
                 .inner_margin(egui::Margin::symmetric(8, 4))
                 .show(ui, |ui| {
-                    ui.label(egui::RichText::new("✦ PARAMETRIC STUDIO").font(theme::semibold(10.0)).color(t.accent_text));
+                    ui.label(egui::RichText::new("PARAMETRIC STUDIO").font(theme::semibold(10.0)).color(t.accent_text));
                 });
             ui.add_space(4.0);
             ui.label(
@@ -170,7 +208,7 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
             ui.spacing_mut().item_spacing = vec2(8.0, 0.0);
             for (idx, (pal_name, _, pal_color)) in PALETTES.iter().enumerate() {
                 let is_sel = selected_color == idx;
-                let (rect, resp) = ui.allocate_exact_size(vec2(86.0, 32.0), Sense::click());
+                let (rect, resp) = ui.allocate_exact_size(vec2(88.0, 32.0), Sense::click());
                 resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, *pal_name));
                 let press = theme::Press::track(ui, &resp);
                 let fill = if is_sel {
@@ -187,7 +225,6 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 };
                 ui.painter().rect(rect, CornerRadius::same(8), fill, border_stroke, egui::StrokeKind::Inside);
 
-                // Small circle dot
                 let dot_center = rect.left_center() + vec2(14.0, 0.0);
                 ui.painter().circle_filled(dot_center, 5.5, *pal_color);
                 if is_sel {
@@ -208,7 +245,7 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
             }
         });
 
-        ui.add_space(16.0);
+        ui.add_space(14.0);
 
         // Section 2: Layout Variations List
         let active_color = PALETTES[selected_color].2;
@@ -229,13 +266,13 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
         ui.add_space(6.0);
 
         egui::ScrollArea::vertical()
-            .max_height(280.0)
+            .max_height(240.0)
             .auto_shrink([false, false])
             .show(ui, |ui| {
                 ui.spacing_mut().item_spacing = vec2(0.0, 6.0);
                 for (idx, opt) in styles.iter().enumerate() {
                     let is_sel = selected_style == idx;
-                    let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width() - 8.0, 50.0), Sense::click());
+                    let (rect, resp) = ui.allocate_exact_size(vec2(ui.available_width() - 8.0, 48.0), Sense::click());
                     resp.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, true, opt.name));
                     let press = theme::Press::track(ui, &resp);
                     let fill = if is_sel {
@@ -261,7 +298,7 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                     ui.painter().text(num_rect.center(), Align2::CENTER_CENTER, num_text, theme::semibold(11.0), num_fg);
 
                     // Title & Description
-                    let title_pos = rect.min + vec2(46.0, 10.0);
+                    let title_pos = rect.min + vec2(46.0, 9.0);
                     ui.painter().text(
                         title_pos,
                         Align2::LEFT_TOP,
@@ -270,7 +307,7 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         t.text,
                     );
 
-                    let desc_pos = rect.min + vec2(46.0, 27.0);
+                    let desc_pos = rect.min + vec2(46.0, 26.0);
                     let mut desc_job = egui::text::LayoutJob::simple_singleline(opt.desc.to_owned(), theme::regular(10.5), t.text_muted);
                     desc_job.wrap = egui::text::TextWrapping::truncate_at_width(rect.width() - 150.0);
                     let desc_galley = ui.fonts_mut(|f| f.layout_job(desc_job));
@@ -289,12 +326,47 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 }
             });
 
-        ui.add_space(16.0);
+        ui.add_space(12.0);
 
-        // Section 3: Footer Actions
+        // Section 3: Save As Custom Template Drawer
+        if show_save_drawer {
+            egui::Frame::NONE
+                .fill(t.card)
+                .stroke(Stroke::new(1.0, t.accent.gamma_multiply(0.4)))
+                .corner_radius(CornerRadius::same(8))
+                .inner_margin(egui::Margin::symmetric(14, 10))
+                .show(ui, |ui| {
+                    ui.label(egui::RichText::new("Save To Personal Template Library").font(theme::semibold(12.5)).color(t.text));
+                    ui.add_space(4.0);
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new("Name:").font(theme::medium(11.5)));
+                        let default_name = format!("My {} ({})", styles[selected_style].name, PALETTES[selected_color].0);
+                        if custom_title.is_empty() {
+                            custom_title = default_name;
+                        }
+                        ui.add(egui::TextEdit::singleline(&mut custom_title).desired_width(220.0));
+                        ui.add_space(10.0);
+                        ui.label(egui::RichText::new("Description:").font(theme::medium(11.5)));
+                        ui.add(egui::TextEdit::singleline(&mut custom_desc).desired_width(200.0));
+                    });
+                    ui.add_space(6.0);
+                    ui.horizontal(|ui| {
+                        if widgets::pill_button(ui, "Save Template Now", true).clicked() {
+                            save_custom = true;
+                        }
+                        ui.add_space(6.0);
+                        if widgets::pill_button(ui, "Dismiss", false).clicked() {
+                            show_save_drawer = false;
+                        }
+                    });
+                });
+            ui.add_space(10.0);
+        }
+
+        // Section 4: Footer Actions
         ui.horizontal(|ui| {
             ui.label(
-                egui::RichText::new("✓ Vector PDF generated in memory")
+                egui::RichText::new("Vector PDF generated in memory")
                     .font(theme::regular(11.0))
                     .color(t.text_faint),
             );
@@ -302,7 +374,15 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 if widgets::pill_button(ui, "Create & Open Template →", true).clicked() {
                     create = true;
                 }
-                ui.add_space(8.0);
+                ui.add_space(6.0);
+                if widgets::pill_button(ui, "Export PDF File", false).clicked() {
+                    export_pdf = true;
+                }
+                ui.add_space(6.0);
+                if widgets::pill_button(ui, if show_save_drawer { "Hide Save Form" } else { "Save As Custom..." }, false).clicked() {
+                    show_save_drawer = !show_save_drawer;
+                }
+                ui.add_space(6.0);
                 if widgets::pill_button(ui, tl!("Cancel"), false).clicked() {
                     close = true;
                 }
@@ -316,8 +396,60 @@ pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
         let (_, rgb, _) = PALETTES[selected_color.min(PALETTES.len() - 1)];
         app.template_picker = None;
         app.create_styled_template_document(default_filename, category_key, selected_style, rgb);
+    } else if export_pdf {
+        let (_, rgb, _) = PALETTES[selected_color.min(PALETTES.len() - 1)];
+        let file_path = rfd::FileDialog::new()
+            .set_title("Export Template PDF")
+            .set_file_name(default_filename)
+            .add_filter("PDF Document", &["pdf"])
+            .save_file();
+        if let Some(path) = file_path {
+            match app.session.create_styled_template(category_key, selected_style, rgb) {
+                Ok(bytes) => {
+                    if std::fs::write(&path, &*bytes).is_ok() {
+                        let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("template.pdf");
+                        app.toast = Some((format!("Exported template PDF to {name}"), 0.0));
+                    } else {
+                        app.toast = Some(("Failed to write exported PDF to disk".to_string(), 0.0));
+                    }
+                }
+                Err(e) => {
+                    app.toast = Some((format!("Export failed: {e}"), 0.0));
+                }
+            }
+        }
+    } else if save_custom {
+        let (_, rgb, _) = PALETTES[selected_color.min(PALETTES.len() - 1)];
+        let title = if custom_title.trim().is_empty() {
+            styles[selected_style].name.to_string()
+        } else {
+            custom_title.trim().to_string()
+        };
+        let desc = if custom_desc.trim().is_empty() {
+            styles[selected_style].desc.to_string()
+        } else {
+            custom_desc.trim().to_string()
+        };
+        app.custom_templates.push(CustomTemplate {
+            id: format!("{}_{}", category_key, std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0)),
+            title: title.clone(),
+            description: desc,
+            category_key: category_key.to_string(),
+            default_filename: default_filename.to_string(),
+            selected_style,
+            selected_color,
+            color_rgb: rgb,
+            created_at: "Personal Library".to_string(),
+        });
+        app.toast = Some((format!("Saved \"{title}\" to your personal template library!"), 0.0));
+        if let Some(p) = &mut app.template_picker {
+            p.show_save_drawer = false;
+        }
     } else if let Some(p) = &mut app.template_picker {
         p.selected_style = selected_style;
         p.selected_color = selected_color;
+        p.custom_title = custom_title;
+        p.custom_desc = custom_desc;
+        p.show_save_drawer = show_save_drawer;
     }
 }

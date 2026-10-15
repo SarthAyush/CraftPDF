@@ -14,6 +14,9 @@ craft-ui = { workspace = true }
 pdfcraft-fonts = { workspace = true }
 pdfcraft-engine = { workspace = true }
 pdfcraft-cos = { workspace = true }
+pdfcraft-edit = { workspace = true }
+pdfcraft-optimize = { workspace = true }
+pdfcraft-organize = { workspace = true }
 pdfcraft-render = { workspace = true }
 pdfcraft-model = { workspace = true }
 pdfcraft-platform = { workspace = true }
