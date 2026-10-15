@@ -1,8 +1,8 @@
-# CraftPDF
+# PDFix
 
 <p align="center">
-  <b>The PDF Workbench — Rebuilt from the ground up in pure Rust.</b><br>
-  Read, edit, organize, combine, split, sign, annotate, and secure PDFs in a blazing fast, private, native desktop application.<br>
+  <b>The PDF Engineering Workbench — Rebuilt from the ground up in pure Rust.</b><br>
+  Read, edit, organize, combine, split, sign, annotate, batch process, and secure PDFs in a blazing fast, private, native desktop application.<br>
   <b>Windows · macOS · Linux · Web</b>
 </p>
 
@@ -14,12 +14,12 @@
 </p>
 
 <p align="center">
-  <b>Maintained by Sarthak (<a href="https://github.com/SarthAyush">@SarthAyush</a>)</b>
+  <b>Configured by Sarthak (<a href="https://github.com/SarthAyush">@SarthAyush</a>)</b>
 </p>
 
 <p align="center">
   <a href="https://github.com/SarthAyush/CraftPDF/releases/download/v0.8.1/CraftPDF-Setup-v0.8.1-x64.exe">
-    <img src="https://img.shields.io/badge/Download-CraftPDF%20Installer%20(.EXE)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Direct EXE" height="42">
+    <img src="https://img.shields.io/badge/Download-PDFix%20Installer%20(.EXE)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Direct EXE" height="42">
   </a>
   &nbsp;&nbsp;
   <a href="https://github.com/SarthAyush/CraftPDF/releases/tag/v0.8.1">
@@ -29,34 +29,34 @@
 
 ---
 
-## 📥 Downloads
+## Downloads
 
 | Platform | Package | Direct Download Link |
 | :--- | :--- | :--- |
-| **Windows (x64)** | **Official Windows Installer (`.exe`)** | [**⬇️ Download CraftPDF-Setup-v0.8.1-x64.exe**](https://github.com/SarthAyush/CraftPDF/releases/download/v0.8.1/CraftPDF-Setup-v0.8.1-x64.exe) |
+| **Windows (x64)** | **Official Windows Installer (`.exe`)** | [**Download PDFix-Setup-v0.8.1-x64.exe**](https://github.com/SarthAyush/CraftPDF/releases/download/v0.8.1/CraftPDF-Setup-v0.8.1-x64.exe) |
 | **All Platforms** | **Release Assets & Notes** | [**View GitHub Releases**](https://github.com/SarthAyush/CraftPDF/releases) |
 
 ---
 
-## ⚡ Highlights
+## Highlights
 
 <table>
 <tr>
 <td width="33%" valign="top">
 
-### 🎨 Faithful Rendering
-Complete typographics: world scripts, vertical text, color emoji, gradients, soft masks, layers, blend modes, and transparency. Powered by `wgpu` with OpenGL fallback.
+### Faithful Rendering
+Complete typographics: world scripts, vertical text, color glyphs, gradients, soft masks, layers, blend modes, and transparency. Powered by `wgpu` with OpenGL fallback.
 
 </td>
 <td width="33%" valign="top">
 
-### 🛡️ Fearless & Safe
+### Fearless & Safe
 Atomic saves leave original files intact until writes are verified. Deep undo/redo stacks, crash recovery, and incremental revision tracking protect your work.
 
 </td>
 <td width="33%" valign="top">
 
-### 🔒 100% Offline & Private
+### 100% Offline & Private
 No accounts, no telemetry, no cloud lock-in. All processing, OCR, conversions, signing, and indexing happen entirely on your local machine.
 
 </td>
@@ -65,20 +65,22 @@ No accounts, no telemetry, no cloud lock-in. All processing, OCR, conversions, s
 
 ---
 
-## ✨ Features
+## Features
 
-- **📖 Complete PDF Viewer:** Single-page, two-page, continuous scroll, book layout, presentation mode, full-text search with regex, bookmarks, and document outline.
-- **✂️ Organize & Rearrange:** Visual thumbnail grid with drag-and-drop page reordering, rotation, page extraction, splitting, and merging.
-- **📝 Annotations & Comments:** Sticky notes, text highlights, underlines, strikethroughs, freehand drawing with pressure sensitivity, stamps, and threaded comments.
-- **✍️ Forms & Signatures:** Interactive AcroForms filling and calculation, XFA support, digital PKI certificate signing, self-signed signatures, and ink signatures.
-- **🔍 OCR (Optical Character Recognition):** Offline embedded text recognition to make scanned PDFs and images instantly searchable and selectable.
-- **🛡️ Redaction & Sanitization:** True structural redaction removing text, hidden metadata, attachments, and embedded streams irreversibly.
-- **📐 Measurement Tools:** Precise distance, perimeter, area, and scale calibration for architectural and engineering drawings.
-- **🖥️ Custom Workspace Docking:** Flexible dockable UI tabs, floating windows, split panels, dark/light theme switching, and keyboard shortcut customization.
+- **Complete PDF Viewer:** Single-page, two-page, continuous scroll, book layout, presentation mode, full-text search with regex, bookmarks, and document outline.
+- **Batch Workflow Studio:** Drop 20+ images or PDFs to merge, convert, compress, or stamp watermarks across all files simultaneously.
+- **Parametric Templates & Custom Library:** Generate professional invoices, proposals, certificates, and notebooks with live parameters, plus export and save custom designs directly into your personal reusable template library.
+- **Organize & Rearrange:** Visual thumbnail grid with drag-and-drop page reordering, rotation, page extraction, splitting, and merging.
+- **Annotations & Comments:** Sticky notes, text highlights, underlines, strikethroughs, freehand drawing with pressure sensitivity, stamps, and threaded comments.
+- **Forms & Signatures:** Interactive AcroForms filling and calculation, XFA support, digital PKI certificate signing, self-signed signatures, and ink signatures.
+- **OCR (Optical Character Recognition):** Offline embedded text recognition to make scanned PDFs and images instantly searchable and selectable.
+- **Redaction & Sanitization:** True structural redaction removing text, hidden metadata, attachments, and embedded streams irreversibly.
+- **Measurement Tools:** Precise distance, perimeter, area, and scale calibration for architectural and engineering drawings.
+- **Custom Workspace Docking:** Flexible dockable UI tabs, floating windows, split panels, dark/light theme switching, and keyboard shortcut customization.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -108,9 +110,9 @@ cargo run --release -p pdfcraft-cli -- --help
 
 ---
 
-## 📂 Architecture
+## Architecture
 
-CraftPDF is built as a clean, highly modular Rust workspace:
+PDFix is built as a clean, highly modular Rust workspace:
 
 | Crate | Responsibility |
 | :--- | :--- |
@@ -128,7 +130,7 @@ CraftPDF is built as a clean, highly modular Rust workspace:
 
 ---
 
-## 📜 License
+## License
 
 This project is dual-licensed under:
 - **MIT License** ([LICENSE-MIT](LICENSE-MIT))

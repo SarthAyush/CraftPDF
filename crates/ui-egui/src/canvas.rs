@@ -3796,7 +3796,7 @@ fn notices(
     } else if info.xfa == Some(pdfcraft_render::Xfa::Dynamic) {
         Some((
             "triangle-alert",
-            "This is a dynamic XFA form, which CraftPDF can't display yet. What you see is the file's placeholder page.".to_string(),
+            "This is a dynamic XFA form, which PDFix can't display yet. What you see is the file's placeholder page.".to_string(),
             false,
         ))
     } else if info.xfa == Some(pdfcraft_render::Xfa::Static) {

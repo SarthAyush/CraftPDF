@@ -173,6 +173,10 @@ impl BatchStudioState {
 
 /// Render the Batch Workflow Studio dialog.
 pub fn show(app: &mut PdfCraftApp, ctx: &egui::Context) {
+    if app.batch_studio.is_none() {
+        return;
+    }
+
     let mut close = false;
     let mut run_workflow = false;
     let mut select_more_files = false;

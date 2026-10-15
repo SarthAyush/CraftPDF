@@ -237,7 +237,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(10, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("CRAFTPDF STUDIO 2.0")
+                                    egui::RichText::new("PDFIX STUDIO 2.0")
                                         .font(theme::semibold(11.0))
                                         .color(t.accent_text)
                                         .extra_letter_spacing(0.6),
@@ -272,7 +272,19 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     });
                     ui.add_space(8.0);
                     ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new("CraftPDF Personal Studio").font(theme::semibold(26.0)).color(t.text));
+                        ui.label(egui::RichText::new("PDFix").font(theme::semibold(28.0)).color(t.text));
+                        ui.add_space(8.0);
+                        egui::Frame::NONE
+                            .fill(t.accent_soft)
+                            .corner_radius(CornerRadius::same(6))
+                            .inner_margin(egui::Margin::symmetric(8, 4))
+                            .show(ui, |ui| {
+                                ui.label(
+                                    egui::RichText::new("Configured by Sarthak")
+                                        .font(theme::semibold(11.5))
+                                        .color(t.accent_text),
+                                );
+                            });
                     });
                     ui.add_space(2.0);
                     ui.label(
@@ -679,7 +691,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
             });
             ui.add_space(8.0);
             if app.recent.is_empty() {
-                ui.label(egui::RichText::new("Files you open in CraftPDF appear here. Drop a PDF anywhere to open it.").color(t.text_muted));
+                ui.label(egui::RichText::new("Files you open in PDFix appear here. Drop a PDF anywhere to open it.").color(t.text_muted));
             }
             let mut open = None;
             let mut remove = None;
@@ -757,7 +769,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         ui.vertical(|ui| {
                             ui.label(egui::RichText::new("100% Offline & Private by Architecture").font(theme::semibold(14.0)).color(t.text));
                             ui.label(
-                                egui::RichText::new("CraftPDF works completely offline. No telemetry, no remote analytics, no accounts, and zero cloud processing.")
+                                egui::RichText::new("PDFix works completely offline. No telemetry, no remote analytics, no accounts, and zero cloud processing.")
                                     .font(theme::regular(12.0))
                                     .color(t.text_muted),
                             );

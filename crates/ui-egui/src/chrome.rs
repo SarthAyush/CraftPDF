@@ -52,8 +52,8 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.active = None;
                     app.combine_tab.focused = false;
                 }
-                let reconfig_text = "Re-configured by Sarthak Saxena";
-                let reconfig_width = ui.fonts_mut(|f| f.layout_no_wrap(reconfig_text.into(), theme::medium(11.0), t.text).size().x) + 20.0;
+                let reconfig_text = "Configured by Sarthak";
+                let reconfig_width = ui.fonts_mut(|f| f.layout_no_wrap(reconfig_text.into(), theme::medium(10.5), t.text).size().x) + 16.0;
                 // Keep the icon buttons, GitHub's text/padding, reconfig text and gaps outside the scrolling tabs.
                 let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 3.0 * button + 64.0 + reconfig_width;
                 // Open stays in sight after the tabs: its icon, text and padding, and the gaps around it.
@@ -247,7 +247,7 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                         .inner_margin(egui::Margin::symmetric(8, 3))
                         .show(ui, |ui| {
                             ui.label(
-                                egui::RichText::new("Re-configured by Sarthak Saxena")
+                                egui::RichText::new("Configured by Sarthak")
                                     .font(theme::medium(10.5))
                                     .color(t.text_muted),
                             );
@@ -360,7 +360,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                                             ui.label(egui::RichText::new(format!("Version {} is ready to download.", release.version)).font(theme::regular(11.5)).color(t.text));
                                         }
                                     } else {
-                                        ui.label(egui::RichText::new(format!("CraftPDF v{current_version}")).font(theme::semibold(13.0)).color(t.text));
+                                        ui.label(egui::RichText::new(format!("PDFix v{current_version}")).font(theme::semibold(13.0)).color(t.text));
                                         ui.label(egui::RichText::new("You are running the latest version.").font(theme::regular(11.5)).color(t.text_muted));
                                     }
                                 });
@@ -409,7 +409,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         });
 
                     ui.add_space(14.0);
-                    ui.label(egui::RichText::new("What's New in CraftPDF").font(theme::semibold(13.0)).color(t.text));
+                    ui.label(egui::RichText::new("What's New in PDFix").font(theme::semibold(13.0)).color(t.text));
                     ui.add_space(6.0);
 
                     // News / Changelog items

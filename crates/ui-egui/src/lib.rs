@@ -2916,7 +2916,7 @@ impl eframe::App for PdfCraftApp {
             .and_then(|i| self.session.get(self.views[i].id))
             .map(|d| d.display_name())
             .or_else(|| self.combine_showing().then(|| tl!("Combine files").to_owned()))
-            .map_or_else(|| "CraftPDF".to_owned(), |name| format!("{name} — CraftPDF"));
+            .map_or_else(|| "PDFix".to_owned(), |name| format!("{name} — PDFix"));
         if title != self.window_title {
             ctx.send_viewport_cmd(egui::ViewportCommand::Title(title.clone()));
             self.window_title = title;

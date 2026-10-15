@@ -290,11 +290,8 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 let version = r.version.trim_start_matches(['v', 'V']);
                 ui.label(egui::RichText::new(crate::i18n::fmt(tl!("PdfCraft {v} is available."), &[("v", version)])).strong());
                 ui.label(
-                    egui::RichText::new(crate::i18n::fmt(
-                        tl!("You have version {c}."),
-                        &[("c", current)],
-                    ))
-                    .color(t.text_muted),
+                    egui::RichText::new(format!("Current version installed: {current}"))
+                        .color(t.text_muted),
                 );
                 ui.add_space(6.0);
 
@@ -358,7 +355,7 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
         }
         ui.add_space(10.0);
         ui.label(
-            egui::RichText::new("CraftPDF updates seamlessly without external redirects.")
+            egui::RichText::new("PDFix updates seamlessly without external redirects.")
                 .color(t.text_muted)
                 .small(),
         );
@@ -377,7 +374,7 @@ pub(crate) fn dialog(app: &mut PdfCraftApp, ctx: &egui::Context) {
                             }
                         }
                         DownloadState::Downloading { .. } => {
-                            if widgets::pill_button(ui, tl!("Hide"), false).clicked() {
+                            if widgets::pill_button(ui, tl!("Later"), false).clicked() {
                                 close = true;
                             }
                         }
