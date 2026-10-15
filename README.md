@@ -18,11 +18,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/SarthAyush/CraftPDF/releases/download/v0.8.1/CraftPDF-Setup-v0.8.1-x64.exe">
+  <a href="https://github.com/SarthAyush/PDFix/releases/download/v0.8.1/PDFix-Setup-v0.8.1-x64.exe">
     <img src="https://img.shields.io/badge/Download-PDFix%20Installer%20(.EXE)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Download Direct EXE" height="42">
   </a>
   &nbsp;&nbsp;
-  <a href="https://github.com/SarthAyush/CraftPDF/releases/tag/v0.8.1">
+  <a href="https://github.com/SarthAyush/PDFix/releases/tag/v0.8.1">
     <img src="https://img.shields.io/badge/Release-v0.8.1%20Notes-238636?style=for-the-badge&logo=github&logoColor=white" alt="v0.8.1 Release" height="42">
   </a>
 </p>
@@ -33,8 +33,8 @@
 
 | Platform | Package | Direct Download Link |
 | :--- | :--- | :--- |
-| **Windows (x64)** | **Official Windows Installer (`.exe`)** | [**Download PDFix-Setup-v0.8.1-x64.exe**](https://github.com/SarthAyush/CraftPDF/releases/download/v0.8.1/CraftPDF-Setup-v0.8.1-x64.exe) |
-| **All Platforms** | **Release Assets & Notes** | [**View GitHub Releases**](https://github.com/SarthAyush/CraftPDF/releases) |
+| **Windows (x64)** | **Official Windows Installer (`.exe`)** | [**Download PDFix-Setup-v0.8.1-x64.exe**](https://github.com/SarthAyush/PDFix/releases/download/v0.8.1/PDFix-Setup-v0.8.1-x64.exe) |
+| **All Platforms** | **Release Assets & Notes** | [**View GitHub Releases**](https://github.com/SarthAyush/PDFix/releases) |
 
 ---
 
@@ -94,8 +94,8 @@ No accounts, no telemetry, no cloud lock-in. All processing, OCR, conversions, s
 
 Clone the repository:
 ```bash
-git clone https://github.com/SarthAyush/CraftPDF.git
-cd CraftPDF/pdfcraft
+git clone https://github.com/SarthAyush/PDFix.git
+cd PDFix/pdfcraft
 ```
 
 Run the desktop application:

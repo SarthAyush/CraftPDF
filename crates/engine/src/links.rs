@@ -4,11 +4,11 @@
 use icu_properties::props::Script;
 use std::path::{Path, PathBuf};
 
-pub const APP: &str = "CraftPDF";
+pub const APP: &str = "PDFix";
 
-pub const GITHUB: &str = "https://github.com/SarthAyush/CraftPDF";
-pub const RELEASES: &str = "https://github.com/SarthAyush/CraftPDF/releases";
-pub const ISSUES: &str = "https://github.com/SarthAyush/CraftPDF/issues";
+pub const GITHUB: &str = "https://github.com/SarthAyush/PDFix";
+pub const RELEASES: &str = "https://github.com/SarthAyush/PDFix/releases";
+pub const ISSUES: &str = "https://github.com/SarthAyush/PDFix/issues";
 pub const AUTHOR: &str = "https://github.com/SarthAyush";
 
 pub const DISCORD: &str = GITHUB;

@@ -343,7 +343,7 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             app.switch_mode(Mode::AllTools, true);
                         }
                         if widgets::icon_pill(ui, "github", "GitHub Repository", false).clicked() {
-                            app.open_url("https://github.com/SarthAyush/CraftPDF");
+                            app.open_url("https://github.com/SarthAyush/PDFix");
                         }
                     });
                 });

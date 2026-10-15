@@ -7,7 +7,7 @@ use egui::{Align, Color32, CornerRadius, Layout, Stroke};
 use crate::{PdfCraftApp, theme, widgets};
 
 /// Where every CraftPDF release is listed.
-pub const RELEASES_PAGE: &str = "https://github.com/SarthAyush/CraftPDF/releases";
+pub const RELEASES_PAGE: &str = "https://github.com/SarthAyush/PDFix/releases";
 
 /// The latest published release.
 #[derive(Clone, Debug, PartialEq, Eq)]

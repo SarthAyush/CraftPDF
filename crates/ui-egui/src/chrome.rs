@@ -234,10 +234,10 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     }
                     // One click to the GitHub repository, from anywhere in the app.
                     if widgets::ghost_button_sized(ui, "github", "GitHub", tab_h)
-                        .on_hover_text("https://github.com/SarthAyush/CraftPDF")
+                        .on_hover_text("https://github.com/SarthAyush/PDFix")
                         .clicked()
                     {
-                        app.open_url("https://github.com/SarthAyush/CraftPDF");
+                        app.open_url("https://github.com/SarthAyush/PDFix");
                     }
                     ui.add_space(4.0);
                     egui::Frame::NONE
@@ -438,7 +438,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                     // Quick links
                     ui.horizontal(|ui| {
                         if ui.link(egui::RichText::new("GitHub Repository").font(theme::medium(11.5))).clicked() {
-                            open_target_url = Some("https://github.com/SarthAyush/CraftPDF".to_string());
+                            open_target_url = Some("https://github.com/SarthAyush/PDFix".to_string());
                         }
                         ui.label("·");
                         if ui.link(egui::RichText::new("All Releases").font(theme::medium(11.5))).clicked() {
@@ -446,7 +446,7 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         }
                         ui.label("·");
                         if ui.link(egui::RichText::new("Report Issue").font(theme::medium(11.5))).clicked() {
-                            open_target_url = Some("https://github.com/SarthAyush/CraftPDF/issues".to_string());
+                            open_target_url = Some("https://github.com/SarthAyush/PDFix/issues".to_string());
                         }
                     });
                 });
