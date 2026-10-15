@@ -51,6 +51,14 @@ if (-not (Test-Path $VersionedExe)) {
 $StandardSetup = Join-Path $DistDir "PDFix-Setup.exe"
 $PortableExe = Join-Path $DistDir "PDFix.exe"
 
+# Ensure certificate exists for signing
+$EnsureCert = Join-Path $PSScriptRoot 'ensure-cert.ps1'
+if (Test-Path $EnsureCert) {
+    try {
+        & pwsh -ExecutionPolicy Bypass -File $EnsureCert -ErrorAction SilentlyContinue
+    } catch {}
+}
+
 # Locate signtool
 $SignToolCandidates = @(
     "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe",
@@ -74,6 +82,12 @@ if ($SignTool) {
 if (Test-Path $VersionedExe) {
     Copy-Item $VersionedExe $StandardSetup -Force
     Copy-Item (Join-Path $Root 'target\release\pdfcraft.exe') $PortableExe -Force
+    
+    # Also stage legacy named binaries so both names exist in dist
+    Copy-Item $VersionedExe (Join-Path $DistDir "CraftPDF-Setup-v$Version-x64.exe") -Force
+    Copy-Item $StandardSetup (Join-Path $DistDir "CraftPDF-Setup.exe") -Force
+    Copy-Item $PortableExe (Join-Path $DistDir "CraftPDF.exe") -Force
+
     Unblock-File $VersionedExe -ErrorAction SilentlyContinue
     Unblock-File $StandardSetup -ErrorAction SilentlyContinue
     
