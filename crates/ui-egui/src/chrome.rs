@@ -52,8 +52,10 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     app.active = None;
                     app.combine_tab.focused = false;
                 }
-                // Keep the three icon buttons, GitHub's text/padding and four gaps outside the scrolling tabs.
-                let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 3.0 * button + 64.0;
+                let reconfig_text = "⚙ Re-configured by Sarthak Saxena";
+                let reconfig_width = ui.fonts_mut(|f| f.layout_no_wrap(reconfig_text.into(), theme::medium(11.0), t.text).size().x) + 20.0;
+                // Keep the icon buttons, GitHub's text/padding, reconfig text and gaps outside the scrolling tabs.
+                let controls_width = ui.fonts_mut(|f| f.layout_no_wrap("GitHub".into(), theme::medium(13.0), t.text).size().x) + 3.0 * button + 64.0 + reconfig_width;
                 // Open stays in sight after the tabs: its icon, text and padding, and the gaps around it.
                 let open_width = ui.fonts_mut(|f| f.layout_no_wrap(tl!("Open").into(), theme::medium(13.0), t.text).size().x) + 38.0 + 12.0;
                 let mut tabs_width = (ui.available_width() - controls_width - open_width).max(0.0);
@@ -237,6 +239,19 @@ pub fn tab_strip(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                     {
                         app.open_url("https://github.com/SarthAyush/CraftPDF");
                     }
+                    ui.add_space(4.0);
+                    egui::Frame::NONE
+                        .fill(t.hover)
+                        .stroke(Stroke::new(1.0, t.border))
+                        .corner_radius(CornerRadius::same(5))
+                        .inner_margin(egui::Margin::symmetric(8, 3))
+                        .show(ui, |ui| {
+                            ui.label(
+                                egui::RichText::new("⚙ Re-configured by Sarthak Saxena")
+                                    .font(theme::medium(10.5))
+                                    .color(t.text_muted),
+                            );
+                        });
                 });
             });
         });
@@ -354,11 +369,32 @@ pub fn notification_viewer(app: &mut PdfCraftApp, ctx: &egui::Context) {
                             ui.add_space(8.0);
                             ui.horizontal(|ui| {
                                 if has_update {
-                                    if ui.button(egui::RichText::new("⬇ Download Update").font(theme::semibold(12.0))).clicked() {
-                                        if let crate::updates::Check::Done(Ok(release)) = &app.updates.check {
-                                            open_target_url = Some(release.url.clone());
-                                        } else {
-                                            open_target_url = Some(crate::updates::RELEASES_PAGE.to_string());
+                                    if let crate::updates::Check::Done(Ok(release)) = &app.updates.check {
+                                        match &app.updates.download_state {
+                                            crate::updates::DownloadState::Idle | crate::updates::DownloadState::Failed(_) => {
+                                                let rel = release.clone();
+                                                if ui.button(egui::RichText::new("⬇ Download Update").font(theme::semibold(12.0))).clicked() {
+                                                    app.start_update_download(rel);
+                                                }
+                                            }
+                                            crate::updates::DownloadState::Downloading { downloaded, total, .. } => {
+                                                let mb_down = *downloaded as f64 / 1_048_576.0;
+                                                if let Some(tot) = *total {
+                                                    let fraction = (*downloaded as f32 / tot as f32).clamp(0.0, 1.0);
+                                                    ui.label(egui::RichText::new(format!("Downloading… {:.0}% ({:.1} MB)", fraction * 100.0, mb_down)).font(theme::medium(11.5)).color(t.text));
+                                                } else {
+                                                    ui.label(egui::RichText::new(format!("Downloading… {:.1} MB", mb_down)).font(theme::medium(11.5)).color(t.text));
+                                                }
+                                            }
+                                            crate::updates::DownloadState::ReadyToInstall { path } => {
+                                                let path_clone = path.clone();
+                                                if ui.button(egui::RichText::new("⚡ Install Update").font(theme::semibold(12.0))).clicked() {
+                                                    app.install_update(&path_clone);
+                                                }
+                                            }
+                                            crate::updates::DownloadState::Installing => {
+                                                ui.label(egui::RichText::new("Launching installer…").font(theme::medium(11.5)).color(t.text));
+                                            }
                                         }
                                     }
                                 } else {

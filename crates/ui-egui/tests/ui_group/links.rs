@@ -66,5 +66,5 @@ fn settled<'a>(h: &'a mut Harness<'static, PdfCraftApp>, label: &'a str) -> egui
 #[test]
 fn about_dialog_shows_developer_profile() {
     let mut h = harness(|app| app.dialog = Some(Dialog::About));
-    settled(&mut h, "github.com/SarthAyush");
+    settled(&mut h, "Sarthak Saxena on GitHub");
 }

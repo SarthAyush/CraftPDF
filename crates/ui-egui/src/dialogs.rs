@@ -1105,7 +1105,7 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                 );
                 ui.add_space(14.0);
 
-                // Dedicated Developer card exclusively for SarthAyush
+                // Dedicated Developer card
                 egui::Frame::NONE
                     .fill(t.card)
                     .corner_radius(CornerRadius::same(12))
@@ -1122,22 +1122,29 @@ fn dialogs(app: &mut PdfCraftApp, ctx: &egui::Context) {
                         ui.add_space(6.0);
                         ui.horizontal(|ui| {
                             let (rect, _) = ui.allocate_exact_size(vec2(28.0, 28.0), Sense::hover());
-                            crate::icons::paint(ui, rect, "github", 24.0, t.accent);
+                            crate::icons::paint(ui, rect, "user", 24.0, t.accent);
                             ui.add_space(6.0);
                             ui.vertical(|ui| {
-                                ui.label(egui::RichText::new("SarthAyush").font(theme::semibold(17.0)).color(t.text));
+                                ui.label(egui::RichText::new("Sarthak Saxena").font(theme::semibold(17.0)).color(t.text));
                                 ui.label(
-                                    egui::RichText::new("Customized, engineered & maintained by SarthAyush.")
+                                    egui::RichText::new("Re-configured, engineered & maintained by Sarthak Saxena.")
                                         .color(t.text_muted)
                                         .font(theme::regular(12.5)),
                                 );
                             });
                         });
-                        ui.add_space(12.0);
+                        ui.add_space(10.0);
                         ui.horizontal(|ui| {
-                            if widgets::icon_pill(ui, "github", "github.com/SarthAyush", true).clicked() {
-                                app.open_url("https://github.com/SarthAyush");
+                            if widgets::icon_pill(ui, "github", "Sarthak Saxena on GitHub", true).clicked() {
+                                app.open_url("https://github.com/SarthAyush/CraftPDF");
                             }
+                        });
+                        ui.add_space(10.0);
+                        ui.separator();
+                        ui.add_space(6.0);
+                        ui.horizontal(|ui| {
+                            ui.label(egui::RichText::new("💡").font(theme::regular(12.0)));
+                            ui.label(egui::RichText::new(crate::tech_jokes::current_joke()).font(theme::regular(11.5)).color(t.text_muted));
                         });
                     });
 

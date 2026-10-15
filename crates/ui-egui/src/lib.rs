@@ -130,6 +130,7 @@ mod system_fonts;
 mod tab_context;
 pub mod theme;
 pub mod ui_scale;
+pub mod tech_jokes;
 pub mod updates;
 mod wheel_pager;
 mod widgets;
@@ -539,6 +540,8 @@ pub struct PdfCraftApp {
     pub dialog: Option<Dialog>,
     /// How to ask for the latest release (the desktop app sets it; see `updates`).
     pub update_source: Option<updates::UpdateSource>,
+    /// How to download the update asset (the desktop app sets it; see `updates`).
+    pub update_downloader: Option<updates::UpdateDownloader>,
     pub(crate) updates: updates::Updates,
     /// Lists the Print dialog's printers in the background (the desktop app sets it; see
     /// [`PrinterSource`]).
@@ -896,6 +899,7 @@ impl PdfCraftApp {
             fill_text_size: fill_sign::TEXT_SIZE,
             dialog: None,
             update_source: None,
+            update_downloader: None,
             updates: updates::Updates::default(),
             printer_source: None,
             print_tasks: print_ui::PrintTasks::default(),

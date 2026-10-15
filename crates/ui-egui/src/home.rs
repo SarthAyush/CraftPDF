@@ -264,20 +264,46 @@ pub fn show(app: &mut PdfCraftApp, ui: &mut egui::Ui) {
                             .inner_margin(egui::Margin::symmetric(8, 4))
                             .show(ui, |ui| {
                                 ui.label(
-                                    egui::RichText::new("⚡ SARTHAYUSH EDITION")
+                                    egui::RichText::new("🦀 MEMORY-SAFE RUST")
                                         .font(theme::semibold(11.0))
                                         .color(t.accent_text),
                                 );
                             });
                     });
                     ui.add_space(8.0);
-                    ui.label(egui::RichText::new("CraftPDF Personal Studio").font(theme::semibold(26.0)).color(t.text));
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new("CraftPDF Personal Studio").font(theme::semibold(26.0)).color(t.text));
+                    });
                     ui.add_space(2.0);
                     ui.label(
                         egui::RichText::new("High-performance personal PDF engineering workbench — local, private, and blazing fast.")
                             .color(t.text_muted)
                             .font(theme::regular(14.0)),
                     );
+                    ui.add_space(4.0);
+                    ui.label(
+                        egui::RichText::new(crate::tech_jokes::dynamic_greeting())
+                            .color(t.accent_text)
+                            .font(theme::medium(13.0)),
+                    );
+                    ui.add_space(8.0);
+                    egui::Frame::NONE
+                        .fill(t.pasteboard)
+                        .stroke(Stroke::new(1.0, t.border))
+                        .corner_radius(CornerRadius::same(8))
+                        .inner_margin(egui::Margin::symmetric(12, 7))
+                        .show(ui, |ui| {
+                            ui.horizontal(|ui| {
+                                ui.label(egui::RichText::new("💡 Tech Byte:").font(theme::semibold(12.0)).color(t.accent));
+                                ui.add_space(4.0);
+                                ui.label(egui::RichText::new(crate::tech_jokes::current_joke()).font(theme::regular(12.0)).color(t.text));
+                                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                                    if ui.small_button("🎲 Next Joke").clicked() {
+                                        crate::tech_jokes::next_joke();
+                                    }
+                                });
+                            });
+                        });
                     ui.add_space(10.0);
                     ui.horizontal(|ui| {
                         ui.spacing_mut().item_spacing = vec2(6.0, 2.0);
